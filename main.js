@@ -1,5 +1,9 @@
+authorized = 0;
+currentUserId = 0;
+currentUserName = '';
 categoriesLimit = 10;
-sum = 0;
+expensesScore = 0;
+incomeScore = 0;
 currentElementClassName = '';
 isDarkTheme = 0;
 lock = 0;
@@ -21,7 +25,7 @@ const data = {
   }]
 };
 
-const ctx = document.getElementById('myChart').getContext('2d');
+const ctx = document.getElementById('myChart');
 const myChart = new Chart(ctx, {
   type: 'doughnut',
   data: data,
@@ -32,6 +36,7 @@ const myChart = new Chart(ctx, {
     hoverOffset: 20,
     rotation: 180,
     offset: 5,
+    cutout: "85%",
     borderRadius: 5,
     labelHover: true,
   }
@@ -42,28 +47,33 @@ function addData(label, value) {
   data.labels.push(label);
   data.datasets[0].data.push(value);
   myChart.update();
-
+  
+  RenderData()
 }
 
 
-const items = [
-    { name: 'Еда', img: 'categories_logo/food.png', price: 0 },
-    { name: 'Авто', img: 'categories_logo/car.png', price: 0 },
-    { name: 'Путешествия', img: 'categories_logo/travel.png', price: 0 },
-    { name: 'Дом', img: 'categories_logo/home.png', price: 0 },
-    { name: 'Услуги', img: 'categories_logo/services.png', price: 0 },
+
+const expensesItems = [
+    // { name: 'Еда', img: 'categories_logo/food.png', price: 10 },
+    // { name: 'Авто', img: 'categories_logo/car.png', price: 10 },
+    // { name: 'Путешествия', img: 'categories_logo/travel.png', price: 10 },
+    // { name: 'Дом', img: 'categories_logo/home.png', price: 10 },
+    // { name: 'Услуги', img: 'categories_logo/services.png', price: 10 }
   ];
 
-// Загрузка данных
+  const incomeItems = [
+    { name: 'Работа', img: 'categories_logo/food.png', price: 20 },
+    { name: 'Хобби', img: 'categories_logo/car.png', price: 30 }
+  ];
 
-function loadData(labelText, priceText) {
 
-    const sumAmount = document.getElementById('sumAmount');
-
-    sumAmount.textContent = `Сумма: ${sum}`;
-    
+function addItems() {
+  
 }
 function showWarning(text){
+  const audio = new Audio('audio/error.mp3');
+  audio.play();
+
   const div1 = document.createElement('div');
   div1.classList.add('backDialogWindow');
   document.body.appendChild(div1);
@@ -83,48 +93,33 @@ function showWarning(text){
   name.textContent = text;
   div.appendChild(name);
 }
+
 RenderData()
 
-function addCategory(category, pricee) {
-  const container = document.getElementById('categoriesContainer');
-
-  // Цикл для создания элементов
-  const categoryElement = document.createElement('div');
-  div.classList.add('categories');
-  div.classList.add(category);
-
-  const name = document.createElement('h3');
-  name.textContent = category;
-  div.appendChild(name);
-
-  const image = document.createElement('img');
-  image.src = 'imgs/food.png';
-  div.appendChild(image);
-
-  const price = document.createElement('p');
-  price.textContent = pricee;
-  price.classList.add('priceInfo');
-  div.appendChild(price);
-
-  container.appendChild(categoryElement);
-
-  console.log(items)
-}
 // Добавление данных при загрузке страницы
 function RenderData(){
 
   document.addEventListener('DOMContentLoaded', () => {
 
     const sumAmount = document.getElementById('sumAmount');
-    items.forEach(item => {
-        sum += eval(item.price);
+
+    //отбор данных с бд
+    fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories')
+      .then(response => response.json())
+      .then(data => {
+        data.forEach(data => {
+            if (data.userId === currentUserId) {
+                addData(data.name, data.price);
+            
+      }});
+
+
     });
-    sumAmount.textContent = `Сумма: ${sum}` + ' ₽';
       // Получение контейнера элементов
       const container = document.getElementById('categoriesContainer');
       
       // Цикл для создания элементов
-      items.forEach(item => {
+      expensesItems.forEach(item => {
         const div = document.createElement('div');
         div.classList.add('categories');
         div.classList.add(item.name);
@@ -193,12 +188,12 @@ function RenderData(){
                   div.appendChild(close);
                 }
                 else {
-                    for (let i = 0; i < items.length; i++) {
-                        if (items[i].name === item.name) {
-                            items[i].price += eval(price.value);
-                            data.datasets[0].data[i] = eval(items[i].price);
+                    for (let i = 0; i < expensesItems.length; i++) {
+                        if (expensesItems[i].name === item.name) {
+                            expensesItems[i].price += eval(price.value);
+                            data.datasets[0].data[i] = eval(expensesItems[i].price);
                             const removedElement = document.getElementsByClassName(item.name)[0];
-                            removedElement.children[2].textContent = eval(items[i].price);
+                            removedElement.children[2].textContent = eval(expensesItems[i].price);
                             console.log(removedElement.children[2])
                             myChart.update();
                             
@@ -209,8 +204,8 @@ function RenderData(){
                     showSuccess(`Категория "${item.name}" успешно обновлена`);
                 }
 
-                sum += eval(price.value);
-                sumAmount.textContent = `Сумма: ${sum} \n` + ' ₽';
+                expensesScore += eval(price.value);
+                sumAmount.textContent = `Сумма: ${expensesScore} \n` + ' ₽';
                 div.remove();
             })
             div.appendChild(confirmButton);
@@ -219,9 +214,9 @@ function RenderData(){
             deleteCategory.textContent = 'Удалить категорию';
             deleteCategory.addEventListener('click', () => {
                 div1.remove();
-                for (let i = 0; i < items.length; i++) {
-                    if (items[i].name === item.name) {
-                        items.splice(i, 1);
+                for (let i = 0; i < expensesItems.length; i++) {
+                    if (expensesItems[i].name === item.name) {
+                        expensesItems.splice(i, 1);
                         data.labels.splice(i, 1);
                         data.datasets[0].data.splice(i, 1);
                         myChart.update();
@@ -244,6 +239,7 @@ function RenderData(){
       });
 
   });
+  sumAmount.textContent = `Сумма: ${expensesScore}` + ' ₽';
 
 }
 
@@ -252,20 +248,20 @@ function addItem() {
     const labelText = document.getElementById('nameInput').value;
     const priceText = document.getElementById('priceInput').value;
 
-    sum += eval(priceText);
+    expensesScore += eval(priceText);
 
     if (!labelText || !priceText) {
 
       showWarning("Все поля должны быть заполнены");
     }
     else {
-        items.forEach(item => {
+        expensesItems.forEach(item => {
             if(item.name.toLowerCase() === labelText.toLowerCase().replace(/\s/g, "")) {
                 showWarning('Такой элемент уже существует')
                 lock = 1;
             }
         })
-        if(items.length === categoriesLimit) {
+        if(expensesItems.length === categoriesLimit) {
           showWarning("Вы достигли лимита категорий");
           lock = 1;
         }
@@ -273,12 +269,11 @@ function addItem() {
           const container = document.getElementById('categoriesContainer');
           container.innerHTML = '';
           RenderData()
-            // loadData(labelText, priceText);
-            items.push({ name: labelText, price: eval(priceText) });
+            expensesItems.push({ name: labelText, price: eval(priceText) });
             // addData(labelText, priceText);
             container.innerHTML = '';
 
-            items.forEach(item => {
+            expensesItems.forEach(item => {
               const div = document.createElement('div');
               div.classList.add('categories');
               div.classList.add(item.name);
@@ -315,7 +310,7 @@ function addCategory() {
       lock = 1;
     }
     else{
-      items.forEach(element => {
+      expensesItems.forEach(element => {
         if(element.name == nameInput.value){
           showWarning("Категория с таким именем уже существует")
           lock = 1;
@@ -323,11 +318,29 @@ function addCategory() {
       });
     }
     if(lock === 0) {
+
+      fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories')
+        .then(response => response.json())
+        const newTask = {
+          userId: currentUserId,
+          name: nameInput.value,
+          price: eval(priceInput.value), 
+        };
+        fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories', {
+          method: 'POST',
+          headers: {'content-type':'application/json'},
+          body: JSON.stringify(newTask)
+        }).then(res => {
+          if (res.ok) {
+              return res.json();
+          }
+        })
+
       showSuccess(`Категория "${nameInput.value}" добавлена`)
       addData(nameInput.value.replace(), priceInput.value);
-      items.push({ name: nameInput.value, price: eval(priceInput.value) });
-      sum += eval(priceInput.value);
-      sumAmount.textContent = `Сумма: ${sum} \n` + ' ₽';
+      expensesItems.push({ name: nameInput.value, price: eval(priceInput.value) });
+      expensesScore += eval(priceInput.value);
+      sumAmount.textContent = `Сумма: ${expensesScore} \n` + ' ₽';
 
       const container = document.getElementById('categoriesContainer');
       const div = document.createElement('div');
@@ -360,7 +373,6 @@ function addCategory() {
               })
               div.appendChild(close);
               
-
               const name = document.createElement('h3');
               name.textContent = nameInput.value;
               div.appendChild(name);
@@ -390,12 +402,11 @@ function addCategory() {
                     div.appendChild(name);
                     div.appendChild(close);
                   }
-                  else {
-                      for (let i = 0; i < items.length; i++) {
-                          if (items[i].name === nameInput.value) {
-                              items[i].price += eval(priceInput.value);
-                              data.datasets[0].data[i] = eval(items[i].price);
-                              
+                  else { // добавление 
+                      for (let i = 0; i < expensesItems.length; i++) {
+                          if (expensesItems[i].name === nameInput.value) {
+                              expensesItems[i].price += eval(priceInput.value);
+                              data.datasets[0].data[i] = eval(expensesItems[i].price);
                               myChart.update();
                               
                               break;
@@ -408,8 +419,8 @@ function addCategory() {
 
                   }
 
-                  sum += eval(price.value);
-                  sumAmount.textContent = `Сумма: ${sum} \n` + ' ₽';
+                  expensesScore += eval(price.value);
+                  sumAmount.textContent = `Сумма: ${expensesScore} \n` + ' ₽';
                   div.remove();
               })
               div.appendChild(confirmButton);
@@ -419,9 +430,9 @@ function addCategory() {
               deleteCategory.textContent = 'Удалить категорию';
               deleteCategory.addEventListener('click', () => {
                   div1.remove();
-                  for (let i = 0; i < items.length; i++) {
-                      if (items[i].name === nameInput.value) {
-                          items.splice(i, 1);
+                  for (let i = 0; i < expensesItems.length; i++) {
+                      if (expensesItems[i].name === nameInput.value) {
+                          expensesItems.splice(i, 1);
                           data.labels.splice(i, 1);
                           data.datasets[0].data.splice(i, 1);
                           myChart.update();
@@ -432,8 +443,8 @@ function addCategory() {
                   div.remove();
                   const deleted = document.getElementsByClassName(nameInput.value)[0];
                   deleted.remove();
-                  sum -= eval(priceInput.value);
-                  sumAmount.textContent = `Сумма: \"${sum}\" \n` + ' ₽';
+                  expensesScore -= eval(priceInput.value);
+                  sumAmount.textContent = `Сумма: ${expensesScore} \n` + ' ₽';
               })
               div.appendChild(deleteCategory);
               container.appendChild(div);
@@ -443,11 +454,18 @@ function addCategory() {
             
 function changeTheme() {
   const themeImg = document.getElementsByClassName('themeImg')[0];
+  const userImg = document.getElementsByClassName('userImg')[0];
 
   if (themeImg.src.includes('dark')) {
     themeImg.src = 'imgs/lightTheme.png';
   } else {
     themeImg.src = 'imgs/darkTheme.png';
+  }
+
+  if (userImg.src.includes('Dark')) {
+    userImg.src = 'imgs/userLightTheme.svg';
+  } else {
+    userImg.src = 'imgs/userDarkTheme.svg';
   }
   const themeText = document.getElementsByClassName('themeText')[0];
   const input = document.querySelector('input');
@@ -468,6 +486,10 @@ function changeTheme() {
 } 
 
 function showSuccess(text) {
+
+  const audio = new Audio('audio/success.mp3');
+  audio.play();
+   
  const succes = document.createElement('div');
  succes.classList.add('success');
 
@@ -485,4 +507,241 @@ function showSuccess(text) {
  setTimeout(() => {
    succes.remove();
  }, 5000);
+}
+
+function swipCategories() {
+  const headerTitle = document.getElementsByClassName('headerTitle')[0];
+  if(headerTitle.textContent === "Расходы"){
+    headerTitle.textContent = "Доходы";
+    data.labels = incomeItems.map(item => item.name);
+    data.datasets[0].data = incomeItems.map(item => eval(item.price));
+
+  } else {
+    headerTitle.textContent = "Расходы";
+    data.labels = expensesItems.map(item => item.name);
+    data.datasets[0].data = expensesItems.map(item => eval(item.price));
+
+  }
+  myChart.update();
+}
+
+function logWindow() { // авторизация
+  if (authorized == 0) {
+    const backLogRegWindow = document.createElement('div');
+    backLogRegWindow.classList.add('backLogRegWindow');
+  
+    const logRegWindow = document.createElement('div');
+    logRegWindow.classList.add('logRegWindow');
+  
+    const close = document.createElement('img');
+    close.classList.add('close');
+    close.src = 'imgs/close.png';
+    close.addEventListener('click', () => {
+      backLogRegWindow.remove();
+      logRegWindow.remove();
+    })
+  
+    const text = document.createElement('h1');
+    text.classList.add('logRegTitle');
+    text.textContent = 'Авторизация';
+  
+    const login = document.createElement('input');
+    login.type = 'text';
+    login.placeholder = 'Логин';
+  
+    const password = document.createElement('input');
+    password.type = 'password';
+    password.placeholder = 'Пароль';
+  
+    const confirmButton = document.createElement('button');
+    confirmButton.classList.add('confirmButton');
+    confirmButton.textContent = 'Войти';
+    confirmButton.addEventListener('click', () => {
+      if (!login.value || !password.value) {
+        showWarning('Заполните все поля');
+      }
+      else {
+        lock = 0;
+        fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/users')
+        .then(response => response.json())
+        .then(data => {
+          for (let i = 0; i < data.length; i++) {
+            if (data[i].login === login.value && data[i].password === password.value) {
+              lock = 1;
+              authorized = 1;
+              showSuccess(`С возвращением, ${data[i].login}!`);
+              currentUserId = data[i].id;
+              currentUserName = data[i].login;
+              document.cookie = `currentUser=${data[i].login};`;
+              logRegWindow.remove();
+              backLogRegWindow.remove();
+              break;
+            }
+          }
+          if (lock === 0) {
+            showWarning('Неверный логин или пароль');
+          }
+        })
+      }
+    })
+  
+    const alreadyReg = document.createElement('p');
+    alreadyReg.textContent = 'Ещё нет аккаунта?';
+    alreadyReg.classList.add('alreadyReg');
+    alreadyReg.addEventListener('click', () => {
+      backLogRegWindow.remove();
+      logRegWindow.remove();
+      regWindow();
+    })
+  
+    document.body.appendChild(backLogRegWindow);
+    backLogRegWindow.appendChild(logRegWindow);
+    logRegWindow.appendChild(text);
+    logRegWindow.appendChild(login);
+    logRegWindow.appendChild(password);
+    logRegWindow.appendChild(close);
+    logRegWindow.appendChild(confirmButton);
+    logRegWindow.appendChild(alreadyReg);
+  }
+ else {
+    
+  const backAccauntWindow = document.createElement('div');
+  backAccauntWindow.classList.add('backLogRegWindow');
+
+  const close = document.createElement('img');
+  close.classList.add('close');
+  close.src = 'imgs/close.png';
+  close.addEventListener('click', () => {
+    backAccauntWindow.remove();
+    account.remove();
+  })
+   const account = document.createElement('div');
+   account.classList.add('logRegWindow');
+   account.classList.add('account');
+
+   const loginTitle = document.createElement('p');
+   loginTitle.classList.add('loginTitle');
+   loginTitle.textContent = `Вы: ${currentUserName}`;
+
+   const exitButton = document.createElement('button');
+   exitButton.classList.add('exitButton');
+   exitButton.textContent = 'Выход';
+   exitButton.addEventListener('click', () => {
+     authorized = 0;
+     currentUserId = 0;
+     currentUserName = '';
+     document.cookie = `currentUser=; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+     backAccauntWindow.remove();
+     account.remove();
+     showSuccess('Вы вышли из аккаунта');
+   })
+
+   document.body.appendChild(backAccauntWindow);
+   backAccauntWindow.appendChild(account);
+   account.appendChild(loginTitle);
+   account.appendChild(exitButton);
+   account.appendChild(close);
+ }
+}
+
+function regWindow() { // регистрация
+
+  const backLogRegWindow = document.createElement('div');
+  backLogRegWindow.classList.add('backLogRegWindow');
+
+  const logRegWindow = document.createElement('div');
+  logRegWindow.classList.add('logRegWindow');
+
+  const close = document.createElement('img');
+  close.classList.add('close');
+  close.src = 'imgs/close.png';
+  close.addEventListener('click', () => {
+    backLogRegWindow.remove();
+    logRegWindow.remove();
+  })
+
+    const text = document.createElement('h1');
+    text.classList.add('logRegTitle');
+    text.textContent = 'Регистрация';
+
+    const login = document.createElement('input');
+    login.type = 'text';
+    login.placeholder = 'Логин';
+
+    const password = document.createElement('input');
+    password.type = 'password';
+    password.placeholder = 'Пароль';
+
+    const confirmButton = document.createElement('button');
+    confirmButton.classList.add('confirmButton');
+    confirmButton.textContent = 'Зарегистрироваться';
+    confirmButton.addEventListener('click', () => {
+    lock = 0;
+    if (!login.value || !password.value) {
+      showWarning('Заполните все поля')
+    } 
+    else if (login.value.length < 4 || password.value.length < 4) {
+      showWarning('Логин или пароль слишком короткие');
+    }
+      else {
+      fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/users')
+      .then(response => response.json())
+      .then(data => {
+        for (let i = 0; i < data.length; i++) {
+          if (data[i].login === login.value) {
+            lock = 1;
+            showWarning('Аккаунт с таким логином уже существует');
+            break;
+          }
+        }
+        if (lock === 0) {
+          const newTask = {
+            login: login.value, 
+            password: password.value, 
+            score: 0,
+          };
+          fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/users', {
+            method: 'POST',
+            headers: {'content-type':'application/json'},
+            body: JSON.stringify(newTask)
+          }).then(res => {
+            if (res.ok) {
+                return res.json();
+            }
+          })
+          showSuccess('Регистрация прошла успешно');
+          currentUserName = login.value;
+          document.cookie = `currentUser=${data[i].login};`;
+          logRegWindow.remove();
+          backLogRegWindow.remove();
+        }
+      })
+    }
+    if (lock === 1) {
+      showSuccess('Регистрация прошла успешно');
+      logRegWindow.remove();
+      backLogRegWindow.remove();
+      authorized = 1;
+      document.cookie = `currentUser=${login.value}`;
+    }
+  })
+
+  const alreadyReg = document.createElement('p');
+  alreadyReg.classList.add('alreadyLogReg');
+  alreadyReg.textContent = 'Уже есть аккаунт?';
+  alreadyReg.classList.add('alreadyReg');
+  alreadyReg.addEventListener('click', () => {
+    backLogRegWindow.remove();
+    logRegWindow.remove();
+    logWindow();
+  })
+
+  document.body.appendChild(backLogRegWindow);
+  backLogRegWindow.appendChild(logRegWindow);
+  logRegWindow.appendChild(text);
+  logRegWindow.appendChild(login);
+  logRegWindow.appendChild(password);
+  logRegWindow.appendChild(close);
+  logRegWindow.appendChild(confirmButton);
+  logRegWindow.appendChild(alreadyReg);
 }

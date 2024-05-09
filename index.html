@@ -1,50 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Diner0</title>
-<link rel="icon" href="/imgs/web_logo.png">
-<link rel="stylesheet" href="style.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&display=swap" rel="stylesheet">
-</head>
-<body class="light-theme">
-    <div class="expenses">
-        <h1 class="title">Расходы</h1>
-    <p id="sumAmount"></p>
-
-        <div class="myChartContainer">
-            <canvas id="myChart"></canvas>
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <script src="main.js"></script>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Diner0</title>
+        <link rel="icon" href="/imgs/web_logo.png">
+        <link rel="stylesheet" href="style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&display=swap" rel="stylesheet">
+    </head>
+    <div class="header">
+        <img onclick="logWindow()" class="userImg" src="./imgs/userLightTheme.svg" alt="">
+        <div class="changeTheme">
+            <button id="changeThemeButton" onclick="changeTheme()">
+            <p class="themeText">light</p>
+            <img class="themeImg" src="/imgs/darkTheme.png" alt="">
+            </button>
         </div>
-        <div id="categoriesContainer"></div>
     </div>
+    <body class="light-theme">
+        <div class="expenses">
+            <div class="titleNscore" onclick="swipCategories()">
+                <h1 class="headerTitle">Расходы</h1>
+                <p id="sumAmount"></p>
+            </div>
 
-    <!-- <div class="income">
-        <h1 class="title" >Доходы</h1>
-        <div class="myChartContainer">
-            <canvas id="myChart1"></canvas>
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <script src="main.js"></script>
+            <div class="myChartContainer">
+                <canvas id="myChart"></canvas>
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script src="main.js"></script>
+            </div>
+            <div id="categoriesContainer"></div>
         </div>
-        <div id="categoriesContainer"></div>
-    </div> -->
-    
-    <div class="addCategoryButton">
-            <input type="text" maxlength="12" id="nameInput" placeholder="Название">
-            <input type="number" min="0" id="priceInput" placeholder="Цена">
-        <button id="addCategoryButton" onclick="addCategory()">Добавить категорию</button>
 
-    </div>
-    <div class="changeTheme">
-        <button id="changeThemeButton" onclick="changeTheme()">
-        <p class="themeText">light</p>
-        <img class="themeImg" src="/imgs/darkTheme.png" alt="">
-        </button>
-    </div>
+            <div class="addCategoryButton">
+                <input type="text" maxlength="12" id="nameInput" placeholder="Название">
+                <input type="number" min="0" id="priceInput" placeholder="Цена">
+                <button id="addCategoryButton" onclick="addCategory()">Добавить категорию</button>
+            </div>
 
-</body>
+    </body>
 </html>
