@@ -1,5 +1,5 @@
 authorized = 0;
-currentUserId = 0;
+currentUserId = -1;
 currentUserName = '';
 categoriesLimit = 10;
 expensesScore = 0;
@@ -9,7 +9,7 @@ isDarkTheme = 0;
 lock = 0;
 
 // Данные для круговой диаграммы (начальные данные)
-const data = {
+const chartData = {
   labels: [],
   datasets: [{
     data: [],
@@ -28,7 +28,7 @@ const data = {
 const ctx = document.getElementById('myChart');
 const myChart = new Chart(ctx, {
   type: 'doughnut',
-  data: data,
+  data: chartData,
   options: {
     responsive: true,
     maintainAspectRatio: false,
@@ -44,11 +44,9 @@ const myChart = new Chart(ctx, {
 
 // Функция для добавления данных в диаграмму
 function addData(label, value) {
-  data.labels.push(label);
-  data.datasets[0].data.push(value);
+  chartData.labels.push(label);
+  chartData.datasets[0].data.push(value);
   myChart.update();
-  
-  RenderData()
 }
 
 
@@ -109,8 +107,9 @@ function RenderData(){
       .then(data => {
         data.forEach(data => {
             if (data.userId === currentUserId) {
-                addData(data.name, data.price);
-            
+              expensesItems.push({ name: data.name, price: data.price });
+              addData(data.name, data.price);
+              console.log(data.userId, currentUserId)
       }});
 
 
@@ -188,18 +187,35 @@ function RenderData(){
                   div.appendChild(close);
                 }
                 else {
-                    for (let i = 0; i < expensesItems.length; i++) {
-                        if (expensesItems[i].name === item.name) {
-                            expensesItems[i].price += eval(price.value);
+                  fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories')
+                    .then(response => response.json())
+                    .then(data => {
+                      if (data.userId === currentUserId) {
+                        for (let i = 0; i < expensesItems.length; i++) {
+                          if (expensesItems[i].name === item.name) {
+                            expensesItems[i].price = eval(price.value);
                             data.datasets[0].data[i] = eval(expensesItems[i].price);
                             const removedElement = document.getElementsByClassName(item.name)[0];
                             removedElement.children[2].textContent = eval(expensesItems[i].price);
                             console.log(removedElement.children[2])
                             myChart.update();
-                            
                             break;
+                          }
                         }
-                    }
+                      }
+                    })
+                    // for (let i = 0; i < expensesItems.length; i++) {
+                    //     if (expensesItems[i].name === item.name) {
+                    //         expensesItems[i].price += eval(price.value);
+                    //         data.datasets[0].data[i] = eval(expensesItems[i].price);
+                    //         const removedElement = document.getElementsByClassName(item.name)[0];
+                    //         removedElement.children[2].textContent = eval(expensesItems[i].price);
+                    //         console.log(removedElement.children[2])
+                    //         myChart.update();
+                            
+                    //         break;
+                    //     }
+                    // }
 
                     showSuccess(`Категория "${item.name}" успешно обновлена`);
                 }
@@ -513,13 +529,13 @@ function swipCategories() {
   const headerTitle = document.getElementsByClassName('headerTitle')[0];
   if(headerTitle.textContent === "Расходы"){
     headerTitle.textContent = "Доходы";
-    data.labels = incomeItems.map(item => item.name);
-    data.datasets[0].data = incomeItems.map(item => eval(item.price));
+    chartData.labels = incomeItems.map(item => item.name);
+    chartData.datasets[0].data = incomeItems.map(item => eval(item.price));
 
   } else {
     headerTitle.textContent = "Расходы";
-    data.labels = expensesItems.map(item => item.name);
-    data.datasets[0].data = expensesItems.map(item => eval(item.price));
+    chartData.labels = expensesItems.map(item => item.name);
+    chartData.datasets[0].data = expensesItems.map(item => eval(item.price));
 
   }
   myChart.update();
@@ -572,9 +588,19 @@ function logWindow() { // авторизация
               showSuccess(`С возвращением, ${data[i].login}!`);
               currentUserId = data[i].id;
               currentUserName = data[i].login;
-              document.cookie = `currentUser=${data[i].login};`;
               logRegWindow.remove();
               backLogRegWindow.remove();
+
+              fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories')
+              .then(response => response.json())
+              .then(data => {
+                for (let i = 0; i < data.length; i++) {
+                  if (data[i].userId === currentUserId) {
+                    console.log(data[i].userId, currentUserId)
+                    expensesItems.push({ name: data[i].name, price: data[i].price });
+                    addData(data[i].name, data[i].price);
+                    // добавление элементов в таблицу СЮДА
+              }}});
               break;
             }
           }
@@ -694,7 +720,7 @@ function regWindow() { // регистрация
             break;
           }
         }
-        if (lock === 0) {
+        if (lock === 0) { // рендер даннных после регистрации
           const newTask = {
             login: login.value, 
             password: password.value, 
@@ -711,9 +737,25 @@ function regWindow() { // регистрация
           })
           showSuccess('Регистрация прошла успешно');
           currentUserName = login.value;
-          document.cookie = `currentUser=${data[i].login};`;
+          currentUserId = data.length + 1;
           logRegWindow.remove();
           backLogRegWindow.remove();
+
+          expensesItems.forEach(item => {
+            expensesItems.pop();
+          })
+          // обновление данных в диаграмме после регистриции
+          fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories') 
+          .then(response => response.json())
+          .then(data => {
+            for (let i = 0; i < data.length; i++) {
+              if (data[i].userId === currentUserId) {
+                expensesItems.push({ name: data.name, price: data.price });
+                break;
+              }
+            }
+          })
+
         }
       })
     }
