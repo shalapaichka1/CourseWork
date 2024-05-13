@@ -11,6 +11,10 @@
         <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&display=swap" rel="stylesheet">
     </head>
     <div class="header">
+        <div class="logo">
+            <img src="./imgs/logoLightTheme.png" class="logoTitle">
+            <img src="./imgs/logoDineroGreen.png" class="logoTitle coin">
+        </div>
         <img onclick="logWindow()" class="userImg" src="./imgs/userLightTheme.svg" alt="">
         <div class="changeTheme">
             <button id="changeThemeButton" onclick="changeTheme()">
@@ -20,6 +24,7 @@
         </div>
     </div>
     <body class="light-theme">
+        <div class="sumAmountTitle">Ваш баланс: 0 ₽</div>
         <div class="expenses">
             <div class="titleNscore" onclick="swipCategories()">
                 <h1 class="headerTitle">Расходы</h1>
@@ -37,8 +42,37 @@
             <div class="addCategoryButton">
                 <input type="text" maxlength="12" id="nameInput" placeholder="Название">
                 <input type="number" min="0" id="priceInput" placeholder="Цена">
-                <button id="addCategoryButton" onclick="addCategory()">Добавить категорию</button>
+                <button class="light-theme" id="addCategoryButton" onclick="addCategory()">Добавить категорию</button>
+            </div>
+        <div class="operationsWindow light-theme">
+            <p class="operationsTitle">Операции</p>
+            <img  class="closeX" src="/imgs/openOperationsButtonLightTheme.png" alt="" onclick="closeOperationsWindow()"/>
+            <div class="operationsContainer">
+                <div class="filters">
+                    <p>Фильтры</p>
+                    <select name="dateFilter" id="dateFilter">
+                        <option disabled selected value="defaultOption">Сортировать по дате</option>
+                        <option value="dateFilter">По возрастанию</option>
+                        <option value="-dateFilter">По убыванию</option>
+                    </select>
+
+                    <select name="priceFilter" id="dateFilter">
+                        <option disabled selected value="defaultOption">Сортировать по цене</option>
+                        <option value="priceFilter">По возрастанию</option>
+                        <option value="-priceFilter">По убыванию</option>
+                    </select>
+
+                    <select name="nameFilter" id="dateFilter">
+                        <option  disabled selected value="defaultOption">Сортировать по названию</option>
+                        <option value="nameFilter">По возрастанию</option>
+                        <option value="-nameFilter">По убыванию</option>
+                    </select>
+                </div>
+            </div>
+            <div class="operationsItemList">
+                <p class="noOperations">Оперций нет</p>
             </div>
 
+        </div>
     </body>
 </html>
