@@ -97,7 +97,7 @@ function renderOperationsData(){
         operationElement.classList.add('operationItem_' + eval(i+1));
   
         const operationCategoryName = document.createElement('p');
-        operationCategoryName.classList.add('operationCategoryTitle');
+        operationCategoryName.classList.add('operationCategoryTitles');
         operationCategoryName.textContent = data[i].categoryName;
 
         const operationDate = document.createElement('p');
@@ -149,108 +149,175 @@ function renderOperationsData(){
         operationsItemList.appendChild(operationElement);
 
         operationElement.addEventListener('click', () => { // создание подробной информации об операции
-          const backDialogWindow = document.createElement('div');
-          backDialogWindow.classList.add('backOperationsInfoWindow');
-          document.body.appendChild(backDialogWindow);
-          const dialogWindow = document.createElement('div');
-          dialogWindow.classList.add('dialogWindow');
-
-          const operationsItemInfo = document.createElement('div');
-          operationsItemInfo.classList.add('operationsItemInfo');
-          backDialogWindow.appendChild(operationsItemInfo);
-
-          const close = document.createElement('img');
-          close.src = 'imgs/close.png';
-          close.addEventListener('click', () => {
-            backDialogWindow.remove();
-            dialogWindow.remove();
-          })
-          operationsItemInfo.appendChild(close);
-    
-          const operationCategoryName = document.createElement('p');
-          operationCategoryName.classList.add('operationCategoryTitle');
-          operationCategoryName.textContent = data[i].categoryName;
-          
-          const operationDescriptionInput = document.createElement('input');
-          operationDescriptionInput.classList.add('operationDescriptionInput');
-          operationDescriptionInput.placeholder = "Описание операции";
-          operationDescriptionInput.value = data[i].description;
-
-          const operationPrice = document.createElement('input');
-          operationPrice.classList.add('operationPriceInfo');
-          operationPrice.placeholder = "Новый счёт";
-          operationPrice.value = data[i].price;
-    
-          const operationDate = document.createElement('p');
-          operationDate.classList.add('operationDate');
-          operationDate.textContent = data[i].date;
-    
-          const operationTime = document.createElement('p');
-          operationTime.classList.add('operationTime');
-          operationTime.textContent = data[i].time;
-          
-          const operationConfirmButton = document.createElement('button');
-          operationConfirmButton.classList.add('operationConfirmButton');
-          operationConfirmButton.textContent = 'Изменить';
-          operationConfirmButton.addEventListener('click', () => {
-            if (operationPrice.value !== '') {
-              fetch('https://663fd818e3a7c3218a4e1d6e.mockapi.io/operations/' + data[i].id, {
-                method: 'PUT', // or PATCH
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  "id": data[i].id,
-                  "categoryName": data[i].categoryName,
-                  "categoryType": data[i].categoryType,
-                  "price": eval(operationPrice.value),
-                  "date": data[i].date,
-                  "time": data[i].time,
-                  "description": data[i].description,
-                  "operationsUserId": data[i].operationsUserId
-                }),
-              })
-              showSuccess(`Операция ${data[i].categoryName} изменена`);
+          if (data[i].categoryType !== 'removal') {
+            const backDialogWindow = document.createElement('div');
+            backDialogWindow.classList.add('backOperationsInfoWindow');
+            document.body.appendChild(backDialogWindow);
+            const dialogWindow = document.createElement('div');
+            dialogWindow.classList.add('dialogWindow');
+  
+            const operationsItemInfo = document.createElement('div');
+            operationsItemInfo.classList.add('operationsItemInfo');
+            backDialogWindow.appendChild(operationsItemInfo);
+  
+            const close = document.createElement('img');
+            close.classList.add('close');
+            close.src = 'imgs/close.png';
+            
+            close.addEventListener('click', () => {
               backDialogWindow.remove();
               dialogWindow.remove();
-              setTimeout(() => {renderOperationsData()}, 500);
-
-            }else {
-              showWarning('Заполните поле "Новый счёт"');
-            }
-          })
-
-          const deleteOperationButton = document.createElement('button');
-          deleteOperationButton.classList.add('deleteOperationButton');
-          deleteOperationButton.textContent = 'Удалить';
-          deleteOperationButton.addEventListener('click', () => {
-            fetch('https://663fd818e3a7c3218a4e1d6e.mockapi.io/operations/' + data[i].id, {
-              method: 'DELETE',
-                }).then(res => {
-                  if (res.ok) {
-                      return res.json();
-                  }
-                  // handle error
-                }).then(task => {
-                  // Do something with deleted task
-                }).catch(error => {
-                  // handle error
+            })
+            operationsItemInfo.appendChild(close);
+      
+            const operationCategoryName = document.createElement('p');
+            operationCategoryName.classList.add('operationCategoryTitle');
+            operationCategoryName.textContent = data[i].categoryName;
+            
+            const operationDescriptionInput = document.createElement('input');
+            operationDescriptionInput.classList.add('operationDescriptionInput');
+            operationDescriptionInput.placeholder = "Описание операции";
+            operationDescriptionInput.value = data[i].description;
+  
+            const operationPrice = document.createElement('input');
+            operationPrice.classList.add('operationPriceInfo');
+            operationPrice.placeholder = "Новый счёт";
+            operationPrice.value = data[i].price;
+      
+            const operationDate = document.createElement('p');
+            operationDate.classList.add('operationDate');
+            operationDate.textContent = data[i].date;
+      
+            const operationTime = document.createElement('p');
+            operationTime.classList.add('operationTime');
+            operationTime.textContent = data[i].time;
+            
+            const operationConfirmButton = document.createElement('button');
+            operationConfirmButton.classList.add('operationConfirmButton');
+            operationConfirmButton.textContent = 'Изменить';
+            operationConfirmButton.addEventListener('click', () => {
+              if (operationPrice.value !== '') {
+                fetch('https://663fd818e3a7c3218a4e1d6e.mockapi.io/operations/' + data[i].id, {
+                  method: 'PUT', // or PATCH
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    "id": data[i].id,
+                    "categoryName": data[i].categoryName,
+                    "categoryType": data[i].categoryType,
+                    "price": eval(operationPrice.value),
+                    "date": data[i].date,
+                    "time": data[i].time,
+                    "description": data[i].description,
+                    "operationsUserId": data[i].operationsUserId
+                  }),
                 })
+                showSuccess(`Операция ${data[i].categoryName} изменена`);
+                backDialogWindow.remove();
+                dialogWindow.remove();
+                setTimeout(() => {renderOperationsData()}, 500);
+  
+              }else {
+                showWarning('Заполните поле "Новый счёт"');
+              }
+            })
+  
+            const deleteOperationButton = document.createElement('button');
+            deleteOperationButton.classList.add('deleteOperationButton');
+            deleteOperationButton.textContent = 'Удалить';
+            deleteOperationButton.addEventListener('click', () => {
+              fetch('https://663fd818e3a7c3218a4e1d6e.mockapi.io/operations/' + data[i].id, {
+                method: 'DELETE',
+                  }).then(res => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                    // handle error
+                  }).then(task => {
+                    // Do something with deleted task
+                  }).catch(error => {
+                    // handle error
+                  })
+  
+              showSuccess(`Операция ${data[i].categoryName} удалена`);
+              setTimeout(() => {renderOperationsData()}, 500);
+              backDialogWindow.remove();
+              dialogWindow.remove();
+            })
+  
+  
+            operationsItemInfo.appendChild(operationCategoryName);
+            operationsItemInfo.appendChild(operationPrice);
+            operationsItemInfo.appendChild(operationDate);
+            operationsItemInfo.appendChild(operationTime);
+            operationsItemInfo.appendChild(operationDescriptionInput);
+            operationsItemInfo.appendChild(operationConfirmButton);
+            operationsItemInfo.appendChild(deleteOperationButton);
+          }
+          else {
+            const backDialogWindow = document.createElement('div');
+            backDialogWindow.classList.add('backOperationsInfoWindow');
+            document.body.appendChild(backDialogWindow);
+            
+  
+            const operationsItemInfo = document.createElement('div');
+            operationsItemInfo.classList.add('operationsItemInfo');
+            operationsItemInfo.classList.add('deletedOperationsItemInfo');
+            backDialogWindow.appendChild(operationsItemInfo);
+  
+            const close = document.createElement('img');
+            close.classList.add('close');
+            close.src = 'imgs/close.png';
+            
+            close.addEventListener('click', () => {
+              backDialogWindow.remove();
+              dialogWindow.remove();
+            })
+            
+      
+            const operationCategoryName = document.createElement('p');
+            operationCategoryName.classList.add('operationCategoryTitle');
+            operationCategoryName.textContent = `Категория "${data[i].categoryName}" была удалена`;
 
-            showSuccess(`Операция ${data[i].categoryName} удалена`);
-            setTimeout(() => {renderOperationsData()}, 500);
-            backDialogWindow.remove();
-            dialogWindow.remove();
-          })
+            const operationDate = document.createElement('p');
+            operationDate.classList.add('operationDate');
+            operationDate.textContent = data[i].date;
+  
+            const operationTime = document.createElement('p');
+            operationTime.classList.add('operationTime');
+            operationTime.textContent = data[i].time;
 
+            const deleteCategoryButton = document.createElement('button');
+            deleteCategoryButton.classList.add('deleteCategoryButton');
+            deleteCategoryButton.textContent = 'Удалить категорию';
+            deleteCategoryButton.addEventListener('click', () => {
+              fetch('https://663fd818e3a7c3218a4e1d6e.mockapi.io/operations/' + data[i].id, {
+                method: 'DELETE',
+                  }).then(res => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                    // handle error
+                  }).then(task => {
+                    // Do something with deleted task
+                  }).catch(error => {
+                    // handle error
+                  })
+  
+              showSuccess(`Категория ${data[i].categoryName} удалена`);
+              setTimeout(() => {renderOperationsData()}, 500);
+              backDialogWindow.remove();
+              dialogWindow.remove();
+            })
 
-          operationsItemInfo.appendChild(operationCategoryName);
-          operationsItemInfo.appendChild(operationPrice);
-          operationsItemInfo.appendChild(operationDate);
-          operationsItemInfo.appendChild(operationTime);
-          operationsItemInfo.appendChild(operationDescriptionInput);
-          operationsItemInfo.appendChild(operationConfirmButton);
-          operationsItemInfo.appendChild(deleteOperationButton);
+            operationsItemInfo.appendChild(operationCategoryName);
+            operationsItemInfo.appendChild(close);
+            operationsItemInfo.appendChild(operationDate);
+            operationsItemInfo.appendChild(operationTime);
+            operationsItemInfo.appendChild(deleteCategoryButton);
+          }
+          
 
         })
       }
@@ -281,6 +348,7 @@ function showWarning(text){
   div.classList.add('dialogWindow');
   div1.appendChild(div);
   const close = document.createElement('img');
+  close.classList.add('close');
   close.src = 'imgs/close.png';
   div.appendChild(close);
 
@@ -319,15 +387,83 @@ function openAccount(){
    const account = document.createElement('div');
    account.classList.add('logRegWindow');
    account.classList.add('account');
+   
+   fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/users/')
+   .then(res => res.json())
+   .then(data => {
+    const loginTitle = document.createElement('input');
+    loginTitle.classList.add('loginTitle');
+    loginTitle.placeholder = `Вы: `
+    loginTitle.disabled = true
+    loginTitle.value = data[currentUserId-1].login;
+ 
+    const passwordTitle = document.createElement('input');
+    passwordTitle.classList.add('passwordTitle');
+    passwordTitle.type = 'password';
+    passwordTitle.placeholder = `Пароль: `
+    passwordTitle.value = data[currentUserId-1].password;
+    passwordTitle.disabled = true
 
-   const loginTitle = document.createElement('p');
-   loginTitle.classList.add('loginTitle');
-   loginTitle.textContent = `Вы: ${currentUserName}`;
+    const phoneTitle = document.createElement('input');
+    phoneTitle.classList.add('phoneTitle');
+    phoneTitle.placeholder = `Телефон: `
+    phoneTitle.value = data[currentUserId-1].phone;
+    phoneTitle.disabled = true
 
-   const exitButton = document.createElement('button');
-   exitButton.classList.add('exitButton');
-   exitButton.textContent = 'Выйти';
-   exitButton.addEventListener('click', () => {
+    const emailTitle = document.createElement('input');
+    emailTitle.classList.add('emailTitle');
+    emailTitle.placeholder = `Email: `
+    emailTitle.value = data[currentUserId-1].email;
+    emailTitle.disabled = true
+
+    const saveChangedButton = document.createElement('button');
+    saveChangedButton.classList.add('saveChangedButton');
+    saveChangedButton.textContent = 'Сохранить';
+    saveChangedButton.addEventListener('click', () => {
+      fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/users/' + data[currentUserId-1].id, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify({
+          login: loginTitle.value,
+          password: passwordTitle.value,
+          phone: phoneTitle.value,
+          email: emailTitle.value
+        })
+      })
+      showSuccess
+    })
+    
+    const changePasswordButton = document.createElement('img');
+    changePasswordButton.classList.add('changePasswordButton');
+    changePasswordButton.classList.add('changeButtons');
+    changePasswordButton.src = '/imgs/cnangeButtonLightTheme.svg';
+    changePasswordButton.addEventListener('click', () => {
+    passwordTitle.disabled = !passwordTitle.disabled
+    loginTitle.disabled = !loginTitle.disabled
+    phoneTitle.disabled = !phoneTitle.disabled
+    emailTitle.disabled = !emailTitle.disabled
+    })
+
+    const visiblePasswordButton = document.createElement('img');
+    visiblePasswordButton.classList.add('visiblePasswordButton');
+    visiblePasswordButton.classList.add('changeButtons');
+    visiblePasswordButton.src = '/imgs/notVisibilityLightTheme.svg';
+    visiblePasswordButton.addEventListener('click', () => {
+    if (passwordTitle.type === 'password') {
+      passwordTitle.type = 'text';
+      visiblePasswordButton.src = '/imgs/visibilityLightTheme.svg';
+    } else {
+      passwordTitle.type = 'password';
+      visiblePasswordButton.src = '/imgs/notVisibilityLightTheme.svg';
+    }
+    })
+
+    const exitButton = document.createElement('button');
+    exitButton.classList.add('exitButton');
+    exitButton.textContent = 'Выйти';
+    exitButton.addEventListener('click', () => {
 
     const operationsItemList = document.getElementsByClassName('operationsItemList')[0];
     operationsItemList.innerHTML = '';
@@ -373,6 +509,16 @@ function openAccount(){
    account.appendChild(loginTitle);
    account.appendChild(exitButton);
    account.appendChild(close);
+   account.appendChild(passwordTitle);
+   account.appendChild(changePasswordButton);
+   account.appendChild(visiblePasswordButton);
+   account.appendChild(phoneTitle);
+   account.appendChild(emailTitle);
+   account.appendChild(saveChangedButton);
+   })
+
+
+   
 }
 // Добавление данных при загрузке страницы
 function RenderData(){
@@ -593,6 +739,7 @@ function addCategoryElement(nameInput, priceInput) {
             div.classList.add('dialogWindow');
 
             const close = document.createElement('img');
+            close.classList.add('close');
             close.src = 'imgs/close.png';
             close.addEventListener('click', () => {
                 div.remove();
@@ -949,7 +1096,8 @@ function logWindow() { // авторизация
                 .then(response => response.json())
                 .then(data => {
                   for (let i = 0; i < data.length; i++) {
-                    if (data[i].userId === currentUserId && isExpensesWindow) {
+                    if (isExpensesWindow){}
+                    if (data[i].userId === currentUserId && data[i].categoryType === 'income') {
                       incomeItems.push({ name: data[i].name, price: data[i].price, categoryType: 'income' });
                       incomeScore += eval(data[i].price);
                       addData(data[i].name, data[i].price);
@@ -961,7 +1109,7 @@ function logWindow() { // авторизация
                       sumAmountScore += eval(data[i].price);
 
                 }
-                    if (data[i].userId === currentUserId && !isExpensesWindow) {
+                    else if (data[i].userId === currentUserId && data[i].categoryType === 'expenses') {
                       expensesItems.push({ name: data[i].name, price: data[i].price, categoryType: 'expenses' });
                       expensesScore += eval(data[i].price);
                       addData(data[i].name, data[i].price);
