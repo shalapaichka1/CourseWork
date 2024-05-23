@@ -2,7 +2,7 @@
 authorized = 0;
 currentUserId = -1;
 currentUserName = '';
-categoriesLimit = 10;
+categoriesLimit = 6 ;
 expensesScore = 0;
 incomeScore = 0;
 currentElementClassName = '';
@@ -209,7 +209,7 @@ function renderOperationsData(){
                     "price": eval(operationPrice.value),
                     "date": data[i].date,
                     "time": data[i].time,
-                    "description": data[i].description,
+                    "description": data[i].description ? data[i].description : '',
                     "operationsUserId": data[i].operationsUserId
                   }),
                 })
@@ -225,7 +225,7 @@ function renderOperationsData(){
   
             const deleteOperationButton = document.createElement('button');
             deleteOperationButton.classList.add('deleteOperationButton');
-            deleteOperationButton.textContent = 'Удалить';
+            deleteOperationButton.textContent = 'Удалить операцию';
             deleteOperationButton.addEventListener('click', () => {
               fetch('https://663fd818e3a7c3218a4e1d6e.mockapi.io/operations/' + data[i].id, {
                 method: 'DELETE',
@@ -290,7 +290,7 @@ function renderOperationsData(){
 
             const deleteCategoryButton = document.createElement('button');
             deleteCategoryButton.classList.add('deleteCategoryButton');
-            deleteCategoryButton.textContent = 'Удалить категорию';
+            deleteCategoryButton.textContent = 'Удалить операцию';
             deleteCategoryButton.addEventListener('click', () => {
               fetch('https://663fd818e3a7c3218a4e1d6e.mockapi.io/operations/' + data[i].id, {
                 method: 'DELETE',
@@ -416,6 +416,12 @@ function openAccount(){
     emailTitle.value = data[currentUserId-1].email;
     emailTitle.disabled = true
 
+    const birthTitle = document.createElement('input');
+    birthTitle.classList.add('birthTitle');
+    birthTitle.placeholder = `Дата рождения: `
+    birthTitle.value = data[currentUserId-1].birthDay;
+    birthTitle.disabled = true
+
     const saveChangedButton = document.createElement('button');
     saveChangedButton.classList.add('saveChangedButton');
     saveChangedButton.textContent = 'Сохранить';
@@ -429,10 +435,13 @@ function openAccount(){
           login: loginTitle.value,
           password: passwordTitle.value,
           phone: phoneTitle.value,
-          email: emailTitle.value
+          email: emailTitle.value,
+          birthDay: birthTitle.value
         })
       })
-      showSuccess
+      showSuccess('Изменения сохранены')
+      backAccauntWindow.remove(); 
+      account.remove();
     })
     
     const changePasswordButton = document.createElement('img');
@@ -444,6 +453,7 @@ function openAccount(){
     loginTitle.disabled = !loginTitle.disabled
     phoneTitle.disabled = !phoneTitle.disabled
     emailTitle.disabled = !emailTitle.disabled
+    birthTitle.disabled = !birthTitle.disabled
     })
 
     const visiblePasswordButton = document.createElement('img');
@@ -515,6 +525,7 @@ function openAccount(){
    account.appendChild(phoneTitle);
    account.appendChild(emailTitle);
    account.appendChild(saveChangedButton);
+   account.appendChild(birthTitle);
    })
 
 
@@ -604,363 +615,8 @@ function updateDataFromAPI() {
   }
     
 }
-function addCategory() {
-     // обновление данных на странице
-
-    lock = 0;
-    const nameInput = document.getElementById('nameInput');
-    const priceInput = document.getElementById('priceInput');
-    const sumAmountTitle = document.getElementsByClassName('sumAmountTitle')[0];
-
-    if(!nameInput.value || !priceInput.value){
-      showWarning("Все поля должны быть заполнены")
-      lock = 1;
-    }
-    else{
-      expensesItems.forEach(element => {
-        if(element.name == nameInput.value){
-          showWarning("Категория с таким именем уже существует")
-          lock = 1;
-        }
-      });
-    }
-    if(lock === 0) {
-
-      const operationsItemList = document.querySelector('.operationsItemList');
-      operationsItemList.innerHTML = '';
-      // тут
-      if (isExpensesWindow) {
-        sumAmountScore -= eval(priceInput.value);
-        sumAmountTitle.textContent = `Итого: ${sumAmountScore}`
-        addOperationsData(nameInput.value, eval(priceInput.value * -1), 'addendum');
-
-        fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories')
-        .then(response => response.json())
-        const newTask = {
-          userId: currentUserId,
-          name: nameInput.value,
-          price: eval(priceInput.value), 
-          categoryType: 'expenses'
-        };
-        fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories', {
-          method: 'POST',
-          headers: {'content-type':'application/json'},
-          body: JSON.stringify(newTask)
-        }).then(res => {
-          if (res.ok) {
-              return res.json();
-          }
-        }).then(data => {
-        })
-        
-        addCategoryElement(nameInput.value, priceInput.value);
-        showSuccess(`Категория "${nameInput.value}" добавлена`)
-        addData(nameInput.value.replace(), priceInput.value);
-        setTimeout(() => {renderOperationsData()}, 500);
-
-        expensesItems.push({ name: nameInput.value, price: eval(priceInput.value), categoryType: 'expenses' });
-        expensesScore += eval(priceInput.value);
-      }
-      else {
-        sumAmountScore -= eval(priceInput.value);
-        sumAmountTitle.textContent = `Итого: ${sumAmountScore}`
-
-        addOperationsData(nameInput.value, eval(priceInput.value), 'addendum');
-        fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories')
-        .then(response => response.json())
-        const newTask = {
-          userId: currentUserId,
-          name: nameInput.value,
-          price: eval(priceInput.value), 
-          categoryType: 'income'
-        };
-        fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories', {
-          method: 'POST',
-          headers: {'content-type':'application/json'},
-          body: JSON.stringify(newTask)
-        }).then(res => {
-          if (res.ok) {
-              return res.json();
-          }
-        }).then(data => {
-        })   
-        
-        addCategoryElement(nameInput.value, priceInput.value);
-        showSuccess(`Категория "${nameInput.value}" добавлена`)
-        addData(nameInput.value.replace(), priceInput.value);
-        setTimeout(() => {renderOperationsData()}, 500);
-
-        incomeItems.push({ name: nameInput.value, price: eval(priceInput.value), categoryType: 'income' });
-        incomeScore += eval(priceInput.value);
-      }
-      nameInput.value = '';
-      priceInput.value = '';
-  }
-}
-            
-function addCategoryElement(nameInput, priceInput) {
-  const container = document.getElementById('categoriesContainer');
-  const div = document.createElement('div');
-
-          div.classList.add('categories');
-          div.classList.add(nameInput.replace(/\s/g, "_"));
-
-          const name = document.createElement('h3');
-          name.textContent = nameInput;
-          div.appendChild(name);
-        
-          const price = document.createElement('p');
-          price.textContent = priceInput + ' ₽';
-          price.classList.add('priceInfo');
-
-          div.appendChild(price);
-          container.appendChild(div);
-
-              div.addEventListener('click', () => {
-                fetch(`https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories`)
-                .then (response => response.json())
-                .then (data => {
-                  for (let i = 0; i < data.length; i++) {
-                    if (data[i].userId === currentUserId && data[i].name === currentCategory) {
-                      deletedElement = data[i].id;
-                      changedElement = data[i].id;
-                      currentPrice = data[i].price; 
-                      console.log(currentPrice)
-                      break;
-                  }
-                  }
-                })
-
-            currentCategory = nameInput;
-            const div1 = document.createElement('div');
-            div1.classList.add('backDialogWindow');
-            document.body.appendChild(div1);
-            const div = document.createElement('div');
-            div.classList.add('dialogWindow');
-
-            const close = document.createElement('img');
-            close.classList.add('close');
-            close.src = 'imgs/close.png';
-            close.addEventListener('click', () => {
-                div.remove();
-                div1.remove();
-            })
-            div.appendChild(close);
-          
-          const name = document.createElement('h3');
-          name.textContent = nameInput;
-          div.appendChild(name);
-
-          const price = document.createElement('input');
-          price.textContent = priceInput;
-          price.classList.add('priceInput');
-          price.placeholder = 'Цена';
-          price.type = "number"
-          price.min = 0
-          div.appendChild(price);
-
-          const description = document.createElement('textarea');
-          description.classList.add('descriptionInput');
-          description.placeholder = 'Описание';
-          div.appendChild(description);
-          // Кнопка подтверждения
-          const confirmButton = document.createElement('button');
-          confirmButton.textContent = 'Подтвердить';
-          confirmButton.classList.add('confirmButton');
-          confirmButton.addEventListener('click', () => {
-            div1.remove();
-              if (!price) {
-                showWarning("Все поля должны быть заполнены");
-
-                const name = document.createElement('h3');
-                name.textContent = 'Заполните все поля';
-                div.appendChild(name);
-                div.appendChild(close);
-              }
-              else { // добавление 
-                // fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories')
-                // .then (response => response.json())
-                // .then (data => {
-                //     if (data.name === currentUserName) {
-                //       const operationsContainer = document.getElementsByClassName('operationsContainer')[0];
-
-                //       const newElement = document.createElement('div');
-                //       newElement.classList.add('operationElement');
-      
-                //       const name = document.createElement('p');
-                //       name.textContent = data.categoryName;
-                //       newElement.appendChild(name);
-
-                //       const price = document.createElement('p');
-                //       price.textContent = data.price;
-                //       newElement.appendChild(price);
-
-                //       const dataTime = document.createElement('p');
-                //       dataTime.textContent = data.dataTime;
-                //       newElement.appendChild(dataTime);
-
-                //       operationsContainer.appendChild(newElement);
-
-                //       chartData.data.datasets[0].data = [] // обновление данных в диаграмме
-                //       chartData.data.labels = [];
-
-                //       expensesScore += priceInput.value;
-
-                //       myChart.update();
-                //   }
-                //   }
-                  
-                // )
-
-                // fetch(`https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories/${changedElement}`, { // обновление данных в API
-                //   method: 'PUT', // or PATCH
-                //   headers: {'content-type':'application/json'},
-                //   body: JSON.stringify({price: currentPrice + eval(price.value)}),
-                // }).then(res => {
-                //   if (res.ok) {
-                //       return res.json();
-                //   }
-                //   // handle error
-                // }).then(task => {
-                //   // do something with the new task
-                // }).catch(error => {
-                //   // handle error
-                // })
-                // updateDataFromAPI()
-                
-                // expensesItems.forEach(item => {
-                //   expensesScore += item.price
-                // })
-
-                
-                div.remove();
-              } // конец кнопки
-          })
-
-          div.appendChild(confirmButton);
-
-          // Удаление категории
-          const deleteCategory = document.createElement('button');
-          deleteCategory.textContent = 'Удалить категорию';
-          deleteCategory.classList.add('exitButton');
-          deleteCategory.addEventListener('click', () => {
-              div1.remove();
-
-              const newTask = {
-                  operationsUserId: parseInt(currentUserId),
-                  categoryName: currentCategory,
-                  price: 0,
-                  date: new Date().toLocaleDateString(),
-                  time: new Date().toLocaleTimeString(),
-                  description: 'null',
-                  categoryType: 'removal'
-              };
-              
-              fetch('https://663fd818e3a7c3218a4e1d6e.mockapi.io/operations/', {
-                method: 'POST',
-                headers: {'content-type':'application/json'},
-                // Send your data in the request body as JSON
-                body: JSON.stringify(newTask)
-              }).then(res => {
-                if (res.ok) {
-                    return res.json();
-                }
-                // handle error
-              }).then(task => {
-                // do something with the new task
-              }).catch(error => {
-                // handle error
-              })
-
-              fetch(`https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories/${deletedElement}`, {
-                  method: 'DELETE',
-              }).then(res => {
-                  if (res.ok) {
-                      return res.json();
-                  } else {
-                      // handle error
-                      console.log('Error deleting task');
-                  }
-              }).then(task => {
-                  // do something with the new task
-                  for (let i = 0; i < expensesItems.length; i++) {
-                      if (expensesItems[i].name === nameInput) {
-                          expensesItems.splice(i, 1);
-                          chartData.labels.splice(i, 1);
-                          chartData.datasets[0].data.splice(i, 1);
-                          myChart.update();
-                          break;
-                  } 
-                  }
-                  // handle error
-              }).then(task => {
-                  // do something with the new task
-              }).catch(error => {
-                  // handle error 
-              })
-              for (let i = 0; i < expensesItems.length; i++) {
-                  if (expensesItems[i].name === nameInput) {
-                      expensesItems.splice(i, 1);
-                      chartData.labels.splice(i, 1);
-                      chartData.datasets[0].data.splice(i, 1);
-                      myChart.update();
-                      break;
-                  }
-              }
-              showSuccess(`Категория "${nameInput}" успешно удалена!`);
-              div.remove();
-              const deletedElements = document.getElementsByClassName(nameInput)[0];
-              deletedElements.remove();
-              console.log(deletedElements)
-              expensesScore -= eval(priceInput);
-              setTimeout(() => {renderOperationsData()}, 500);
-
-          })
-          div.appendChild(deleteCategory);
-          container.appendChild(div);
-  });
-}
-
-function changeTheme() {
-  const logoImg = document.getElementsByClassName('logoTitle')[0];
-  const themeImg = document.getElementsByClassName('themeImg')[0];
-  const userImg = document.getElementsByClassName('userImg')[0];
-  if (document.getElementsByClassName("userImg")[0]) {
-    if (userImg.src.includes('Dark')) {
-      userImg.src = 'imgs/userLightTheme.svg';
-      logoImg.src = 'imgs/logoLightTheme.png';
-    } else {
-      userImg.src = 'imgs/userDarkTheme.svg';
-      logoImg.src = 'imgs/logoDarkTheme.png';
-    }
-  }
-  if (themeImg.src.includes('dark')) {
-    themeImg.src = 'imgs/lightTheme.png';
-  } else {
-    themeImg.src = 'imgs/darkTheme.png';
-  }
 
 
-
-  const themeText = document.getElementsByClassName('themeText')[0];
-  const input = document.querySelector('input');
-  const inputNumber = document.querySelector('input[type="number"]');
-  const button = document.querySelector('button');
-  const operationsWindow = document.getElementsByClassName('operationsWindow')[0];
-
-  themeText.textContent = themeText.textContent === 'dark' ? 'light' : 'dark';
-  operationsWindow.classList.toggle('dark-theme')
-  input.classList.toggle('dark-theme');
-  inputNumber.classList.toggle('dark-theme');
-  button.classList.toggle('dark-theme');
-
-  input.classList.toggle('light-theme');
-  inputNumber.classList.toggle('light-theme');
-  button.classList.toggle('light-theme');
-
-  document.body.classList.toggle('dark-theme');
-  document.body.classList.toggle('light-theme');
-} 
 
 function showSuccess(text) {
 
@@ -1006,7 +662,6 @@ function swipCategories() {
         }
       });
     });
-    sumAmount.textContent = "Итого: " + incomeScore;
   } else {
     headerTitle.textContent = "Расходы";
     chartData.labels = expensesItems.map(item => item.name);
@@ -1021,7 +676,6 @@ function swipCategories() {
         }
       });
     });
-    sumAmount.textContent = "Итого: " + incomeScore;
   }
   myChart.update();
   isExpensesWindow = !isExpensesWindow;
@@ -1102,7 +756,6 @@ function logWindow() { // авторизация
                       incomeScore += eval(data[i].price);
                       addData(data[i].name, data[i].price);
                       addCategoryElement(data[i].name, data[i].price)
-                      sumAmount.textContent = `Итого: ${incomeScore}` + ' ₽';
                       chartData.labels = incomeItems.map(item => item.name);
                       chartData.datasets[0].data = incomeItems.map(item => eval(item.price));
                       myChart.update();
@@ -1114,14 +767,12 @@ function logWindow() { // авторизация
                       expensesScore += eval(data[i].price);
                       addData(data[i].name, data[i].price);
                       addCategoryElement(data[i].name, data[i].price)
-                      sumAmount.textContent = `Итого: ${expensesScore}` + ' ₽';
                       chartData.labels = expensesItems.map(item => item.name);
                       chartData.datasets[0].data = expensesItems.map(item => eval(item.price));
                       sumAmountScore -= eval(data[i].price);
 
                     }
                     const sumAmountTitle = document.getElementsByClassName('sumAmountTitle')[0];
-                    sumAmountTitle.textContent = `Ваш баланс: ${sumAmountScore} ₽`; 
                     myChart.update();
               }
               });
