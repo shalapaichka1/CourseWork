@@ -87,9 +87,7 @@ function addCategory() {
      }
      nameInput.value = '';
      priceInput.value = '';
-
-     addOperationsData(currentCategory, priceInput.value, 'addendum');
-     renderOperationsData();
+     
  }
  else if (expensesItems.length >= categoriesLimit) {
    showWarning("Вы превысили лимит категорий");
@@ -145,10 +143,36 @@ function addCategoryElement(nameInput, priceInput) {
               })
               div.appendChild(close);
             
-            const name = document.createElement('h3');
-            name.textContent = nameInput;
+            const name = document.createElement('input');
+            name.placeholder = nameInput;
+            name.classList.add('nameInputHeaderTitle');
             div.appendChild(name);
-  
+
+            const confirm = document.createElement('button');
+            confirm.textContent = '✓';
+            confirm.classList.add('confirmButtonTitle');
+            confirm.addEventListener('click', () => {
+                if (name.value != '') {
+                    fetch(`https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories/${changedElement}`, {
+                        method: 'PUT',
+                        headers: {'content-type':'application/json'},
+                        body: JSON.stringify({
+                          name: name.value
+                        })
+                      }).then(res => {
+                        if (res.ok) {
+                          return res.json();
+                        }
+                      })
+                }
+                else {
+                    showWarning("Поле имя не может быть пустым");
+                }
+                div1.remove();
+                div.remove();
+            })
+            div.appendChild(confirm);
+
             const price = document.createElement('input');
             price.textContent = priceInput;
             price.classList.add('priceInput');
@@ -201,6 +225,10 @@ function addCategoryElement(nameInput, priceInput) {
                       myChart.data.datasets[0].data = expensesItems.map(item => eval(item.price));
                       myChart.data.labels = expensesItems.map(item => item.name);
                       myChart.update();
+
+                      addOperationsData(currentCategory, price.value, 'expenses');
+                      renderOperationsData();
+
                   }
                   else {
                     for (let i = 0; i < incomeItems.length; i++) {
@@ -213,6 +241,10 @@ function addCategoryElement(nameInput, priceInput) {
                       myChart.data.datasets[0].data = incomeItems.map(item => eval(item.price));
                       myChart.data.labels = incomeItems.map(item => item.name);
                       myChart.update();
+
+                      addOperationsData(currentCategory, price.value, 'income');
+                      renderOperationsData();
+
                   }
 
                   let changed = document.getElementsByClassName(currentCategory)[0];
