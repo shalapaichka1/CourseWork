@@ -22,7 +22,6 @@ function addCategory() {
 
      const operationsItemList = document.querySelector('.operationsItemList');
      operationsItemList.innerHTML = '';
-     // тут
      if (isExpensesWindow) {
        sumAmountScore -= eval(priceInput.value);
        addOperationsData(nameInput.value, eval(priceInput.value * -1), 'addendum');
@@ -75,8 +74,7 @@ function addCategory() {
              return res.json();
          }
        }).then(data => {
-       })   
-       
+       })
        addCategoryElement(nameInput.value, priceInput.value);
        showSuccess(`Категория "${nameInput.value}" добавлена`)
        addData(nameInput.value.replace(), priceInput.value);
@@ -85,6 +83,7 @@ function addCategory() {
        incomeItems.push({ name: nameInput.value, price: eval(priceInput.value), categoryType: 'income' });
        incomeScore += eval(priceInput.value);
      }
+     amountScoreDB();
      nameInput.value = '';
      priceInput.value = '';
      
@@ -164,9 +163,28 @@ function addCategoryElement(nameInput, priceInput) {
                           return res.json();
                         }
                       })
+                    if(!isExpensesWindow){
+                      expensesItems.forEach(element => {
+                        if (element.name === currentCategory) {
+                          element.name = name.value
+                          element.price = currentPrice
+                        }
+
+                      })
+
+                    }
+                    else {
+                      incomeItems.forEach(element => {
+                        if (element.name === currentCategory) {
+                          element.name = name.value
+                          element.price = currentPrice
+                        }
+                      })
+                    }
                 }
                 else {
                     showWarning("Поле имя не может быть пустым");
+                    myChart.data.labels = expensesItems.map(item => item.name);
                 }
                 div1.remove();
                 div.remove();
@@ -203,7 +221,7 @@ function addCategoryElement(nameInput, priceInput) {
                   fetch(`https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories/${changedElement}`, {
                     method: 'PUT', // or PATCH
                     headers: {'content-type':'application/json'},
-                    body: JSON.stringify({price: eval(currentPrice + eval(price.value))}),
+                    body: JSON.stringify({price: eval(currentPrice + eval(price.value))}, {description: description.value}), 
                   }).then(res => {
                     if (res.ok) {
                         return res.json();
@@ -218,10 +236,10 @@ function addCategoryElement(nameInput, priceInput) {
                     for (let i = 0; i < expensesItems.length; i++) {
                         if (expensesItems[i].name === currentCategory) {
                           expensesItems[i].price = eval(currentPrice + eval(price.value));
+                          expensesItems[i].name = name.value
                           break;
                         }
                       }
-    
                       myChart.data.datasets[0].data = expensesItems.map(item => eval(item.price));
                       myChart.data.labels = expensesItems.map(item => item.name);
                       myChart.update();

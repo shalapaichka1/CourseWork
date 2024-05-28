@@ -34,6 +34,40 @@ const chartData = {
   }]
 };
 
+function amountScoreDB() {
+  DBScore = 0
+  fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/categories')
+  .then(response => response.json())
+  .then(data => {
+    for (let i = 1; i < data.length; i++) {
+      if (data[i].userId === currentUserId) {
+        if (data[i].categoryType === 'income') {
+          DBScore += eval(data[i].price);
+          console.log(DBScore);
+
+        } else if (data[i].categoryType === 'expenses') {
+          DBScore -= eval(data[i].price);
+          console.log(DBScore);
+
+        }
+      }
+    }
+  });
+  fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/users/' + currentUserId, {
+    method: 'PUT', // or PATCH
+    headers: {'content-type':'application/json'},
+    body: JSON.stringify({score: String.DBScore})
+  }).then(res => {
+    if (res.ok) {
+        return res.json();
+    }
+    // handle error
+  }).then(task => {
+    // Do something with updated task
+  }).catch(error => {
+    // handle error
+  })
+}
 
 const ctx = document.getElementById('myChart');
 const myChart = new Chart(ctx, {
@@ -48,7 +82,6 @@ const myChart = new Chart(ctx, {
     offset: 5,
     cutout: "85%",
     borderRadius: 5,
-    labelHover: true,
   }
 });
 
@@ -184,10 +217,11 @@ function renderOperationsData(){
                     "price": eval(operationPrice.value),
                     "date": data[i].date,
                     "time": data[i].time,
-                    "description": data[i].description ? data[i].description : '',
+                    "description": data[i].description,
                     "operationsUserId": data[i].operationsUserId
                   }),
                 })
+                alert("asd")
                 showSuccess(`Операция ${data[i].categoryName} изменена`);
                 backDialogWindow.remove();
                 dialogWindow.remove();
