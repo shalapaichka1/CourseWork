@@ -11,7 +11,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&display=swap" rel="stylesheet">
     </head>
     <div class="header">
-        <div class="logo">
+        <div class="logo" >
             <img src="./imgs/logoLightTheme.png" class="logoTitle">
             <img src="./imgs/logoDineroGreen.png" class="logoTitle coin">
         </div>
@@ -24,11 +24,16 @@
         </div>
     </div>
     <body class="light-theme">
-        <div class="sumAmountTitle">Ваш баланс: 0 ₽</div>
+        <div class="monthBlock">
+            <p class="prewMonth">&lsaquo;</p>
+            <p class="currentMonth"></p>
+            <p class="nextMonth">&rsaquo;</p>
+        </div>
+        <div class="sumAmountTitle"></div>
         <div class="expenses">
             <div class="titleNscore" onclick="swipCategories()">
                 <h1 class="headerTitle">Расходы</h1>
-                <p id="sumAmount"></p>
+                <p id="sumAmount">0 ₽</p>
             </div>
 
             <div class="myChartContainer">
@@ -39,38 +44,41 @@
                 <script src="changeTheme.js"></script>
                 <script src="notifications.js"></script>
                 <script src="operations.js"></script>
-
+                <script src="inputMask.js"></script>
+                <script src="changeMonth.js"></script>
+                <script src="renderAmount.js"></script>
+                <script src="categorySort.js"></script>
             </div>
             <div id="categoriesContainer"></div>
         </div>
 
             <div class="addCategoryButton">
                 <input type="text" maxlength="12" id="nameInput" placeholder="Название">
-                <input type="number" min="0" id="priceInput" placeholder="Цена">
                 <button class="light-theme" id="addCategoryButton" onclick="addCategory()">Добавить категорию</button>
             </div>
         <div class="operationsWindow light-theme">
+            <img src="/imgs/refreshLightTheme.svg" class="refresh" onclick="renderOperationsData()">
             <p class="operationsTitle">Операции</p>
-            <img  class="closeX" src="/imgs/openOperationsButtonLightTheme.png" alt="" onclick="closeOperationsWindow()"/>
+            <img id="openOperations" class="closeX" src="/imgs/openOperationsButtonLightTheme.png" alt="" onclick="closeOperationsWindow()"/>
             <div class="operationsContainer">
                 <div class="filters">
                     <p>Фильтры</p>
-                    <select name="dateFilter" id="dateFilter">
+                    <select class="dateSelect" name="dateFilter" id="dateFilters" onclick="dateFilter()">
                         <option disabled selected value="defaultOption">Сортировать по дате</option>
-                        <option value="dateFilter">По возрастанию</option>
-                        <option value="-dateFilter">По убыванию</option>
+                        <option value="dateFilter">С нового к старому</option>
+                        <option value="-dateFilter">Со старого к новому</option>
                     </select>
 
-                    <select name="priceFilter" id="dateFilter">
-                        <option disabled selected value="defaultOption">Сортировать по цене</option>
-                        <option value="priceFilter">По возрастанию</option>
-                        <option value="-priceFilter">По убыванию</option>
+                    <select name="typeFilter" id="typeFilter">
+                        <option disabled selected value="defaultOption">Сортировать по типу</option>
+                        <option value="addendum">Добавление</option>
+                        <option value="removal">Удаление</option>
+                        <option value="expense">Расход</option>
+                        <option value="income">Доход</option>
                     </select>
 
-                    <select name="nameFilter" id="dateFilter">
-                        <option  disabled selected value="defaultOption">Сортировать по названию</option>
-                        <option value="nameFilter">По возрастанию</option>
-                        <option value="-nameFilter">По убыванию</option>
+                    <select name="categoryFilterName" id="categoryFilter" onclick="categorySort()">
+                        <option disabled selected value="defaultOption">Сортировать по категории</option>
                     </select>
                 </div>
             </div>

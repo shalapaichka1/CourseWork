@@ -6,8 +6,8 @@ function addCategory() {
    const priceInput = document.getElementById('priceInput');
    const sumAmountTitle = document.getElementsByClassName('sumAmountTitle')[0];
 
-   if(!nameInput.value || !priceInput.value){
-     showWarning("Все поля должны быть заполнены")
+   if(!nameInput.value){
+     showWarning("Вы не ввели название категории")
      lock = 1;
    }
    else{
@@ -18,20 +18,18 @@ function addCategory() {
        }
      });
    }
-   if(lock === 0 && expensesItems.length < categoriesLimit) {
-
+   if(lock === 0) {
      const operationsItemList = document.querySelector('.operationsItemList');
      operationsItemList.innerHTML = '';
      if (isExpensesWindow) {
-       sumAmountScore -= eval(priceInput.value);
-       addOperationsData(nameInput.value, eval(priceInput.value * -1), 'addendum');
+       addOperationsData(nameInput.value,'', -1, 'addendum');
 
        fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories')
        .then(response => response.json())
        const newTask = {
          userId: currentUserId,
          name: nameInput.value,
-         price: eval(priceInput.value), 
+         price: 0, 
          categoryType: 'expenses'
        };
        fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories', {
@@ -45,24 +43,21 @@ function addCategory() {
        }).then(data => {
        })
        
-       addCategoryElement(nameInput.value, priceInput.value);
+       addCategoryElement(nameInput.value, 0);
        showSuccess(`Категория "${nameInput.value}" добавлена`)
-       addData(nameInput.value.replace(), priceInput.value);
-       setTimeout(() => {renderOperationsData()}, 500);
-
-       expensesItems.push({ name: nameInput.value, price: eval(priceInput.value), categoryType: 'expenses' });
-       expensesScore += eval(priceInput.value);
+       addData(nameInput.value.replace(), 0);
+       setTimeout(() => {renderOperationsData(), amountBalance(), updateFiterElements()}, 1000);
+       
+       expensesItems.push({ name: nameInput.value, price: 0, categoryType: 'expenses' });
      }
      else {
-       sumAmountScore += eval(priceInput.value);
-
-       addOperationsData(nameInput.value, eval(priceInput.value), 'addendum');
+       addOperationsData(nameInput.value, '',  1, 'addendum');
        fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories')
        .then(response => response.json())
        const newTask = {
          userId: currentUserId,
          name: nameInput.value,
-         price: eval(priceInput.value), 
+         price: 0, 
          categoryType: 'income'
        };
        fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories', {
@@ -75,22 +70,17 @@ function addCategory() {
          }
        }).then(data => {
        })
-       addCategoryElement(nameInput.value, priceInput.value);
+       addCategoryElement(nameInput.value, 0);
        showSuccess(`Категория "${nameInput.value}" добавлена`)
-       addData(nameInput.value.replace(), priceInput.value);
-       setTimeout(() => {renderOperationsData()}, 500);
+       addData(nameInput.value.replace(), 0);
+       setTimeout(() => {renderOperationsData(), amountBalance(), updateFiterElements()}, 1000);
 
-       incomeItems.push({ name: nameInput.value, price: eval(priceInput.value), categoryType: 'income' });
-       incomeScore += eval(priceInput.value);
+       incomeItems.push({ name: nameInput.value, price: 0, categoryType: 'income' });
      }
      amountScoreDB();
      nameInput.value = '';
-     priceInput.value = '';
      
  }
- else if (expensesItems.length >= categoriesLimit) {
-   showWarning("Вы превысили лимит категорий");
- } 
 }
 
 function addCategoryElement(nameInput, priceInput) {
@@ -120,7 +110,6 @@ function addCategoryElement(nameInput, priceInput) {
                         deletedElement = data[i].id;
                         changedElement = data[i].id;
                         currentPrice = data[i].price; 
-                        console.log(currentPrice)
                         break;
                     }
                     }
@@ -169,9 +158,7 @@ function addCategoryElement(nameInput, priceInput) {
                           element.name = name.value
                           element.price = currentPrice
                         }
-
                       })
-
                     }
                     else {
                       incomeItems.forEach(element => {
@@ -184,7 +171,7 @@ function addCategoryElement(nameInput, priceInput) {
                 }
                 else {
                     showWarning("Поле имя не может быть пустым");
-                    myChart.data.labels = expensesItems.map(item => item.name);
+                    // myChart.data.labels = expensesItems.map(item => item.name);
                 }
                 div1.remove();
                 div.remove();
@@ -209,19 +196,19 @@ function addCategoryElement(nameInput, priceInput) {
             confirmButton.classList.add('confirmButton');
             confirmButton.addEventListener('click', () => {
               div1.remove();
-                if (!price) {
-                  showWarning("Все поля должны быть заполнены");
+                if (price.value === '' || price.value === 'e') {
+                  showWarning("Поле цена не может быть пустым");
   
                   const name = document.createElement('h3');
                   name.textContent = 'Заполните все поля';
                   div.appendChild(name);
                   div.appendChild(close);
                 }
-                else { // добавление 
+                else {                   
                   fetch(`https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories/${changedElement}`, {
                     method: 'PUT', // or PATCH
                     headers: {'content-type':'application/json'},
-                    body: JSON.stringify({price: eval(currentPrice + eval(price.value))}, {description: description.value}), 
+                    body: JSON.stringify({price: eval(currentPrice + eval(price.value))}), 
                   }).then(res => {
                     if (res.ok) {
                         return res.json();
@@ -243,10 +230,7 @@ function addCategoryElement(nameInput, priceInput) {
                       myChart.data.datasets[0].data = expensesItems.map(item => eval(item.price));
                       myChart.data.labels = expensesItems.map(item => item.name);
                       myChart.update();
-
-                      addOperationsData(currentCategory, price.value, 'expenses');
-                      renderOperationsData();
-
+                      addOperationsData(currentCategory, description.value, Number(price.value), 'expenses');
                   }
                   else {
                     for (let i = 0; i < incomeItems.length; i++) {
@@ -257,21 +241,33 @@ function addCategoryElement(nameInput, priceInput) {
                       }
     
                       myChart.data.datasets[0].data = incomeItems.map(item => eval(item.price));
-                      myChart.data.labels = incomeItems.map(item => item.name);
+                      // myChart.data.labels = incomeItems.map(item => item.name);
                       myChart.update();
 
-                      addOperationsData(currentCategory, price.value, 'income');
+                      addOperationsData(currentCategory, description.value, Number(price.value), 'income');
                       renderOperationsData();
-
                   }
 
                   let changed = document.getElementsByClassName(currentCategory)[0];
                   changed.children[1].textContent = eval(currentPrice + eval(price.value)) + ' ₽';
-                  console.log(changed)
                 }
 
                 div.remove();
                 showSuccess(`Категория "${nameInput}" изменена`)
+                amountBalance();
+                renderOperationsData();
+
+                if(isExpensesWindow) {
+                  setTimeout(() => {
+                  renderAmount('expenses');
+                    
+                  }, 700)
+                }
+                else{
+                  setTimeout(() => {
+                  renderAmount('income');
+                  },700)
+                }
             })
   
             div.appendChild(confirmButton);
@@ -286,7 +282,7 @@ function addCategoryElement(nameInput, priceInput) {
                 const newTask = {
                     operationsUserId: parseInt(currentUserId),
                     categoryName: currentCategory,
-                    price: 0,
+                    price: price.value,
                     date: new Date().toLocaleDateString(),
                     time: new Date().toLocaleTimeString(),
                     description: 'null',
@@ -319,41 +315,47 @@ function addCategoryElement(nameInput, priceInput) {
                         console.log('Error deleting task');
                     }
                 }).then(task => {
-                    // do something with the new task
+                  if (isExpensesWindow) {
                     for (let i = 0; i < expensesItems.length; i++) {
-                        if (expensesItems[i].name === nameInput) {
-                            expensesItems.splice(i, 1);
-                            chartData.labels.splice(i, 1);
-                            chartData.datasets[0].data.splice(i, 1);
-                            myChart.update();
-                            break;
-                    } 
-                    }
+                      if (expensesItems[i].name === nameInput) {
+                          expensesItems.splice(i, 1);
+                          // chartData.labels.splice(i, 1);
+                          chartData.datasets[0].data.splice(i, 1);
+                          myChart.update();
+                          break;
+                  } 
+                  }
+                  }
+                  else {
+                    for (let i = 0; i < incomeItems.length; i++) {
+                      if (incomeItems[i].name === nameInput) {
+                          incomeItems.splice(i, 1);
+                          // chartData.labels.splice(i, 1);
+                          chartData.datasets[0].data.splice(i, 1);
+                          myChart.update();
+                          break;
+                  } 
+                  }
+                  }
+                    // do something with the new task
+                    
                     // handle error
                 }).then(task => {
                     // do something with the new task
                 }).catch(error => {
                     // handle error 
                 })
-                for (let i = 0; i < expensesItems.length; i++) {
-                    if (expensesItems[i].name === nameInput) {
-                        expensesItems.splice(i, 1);
-                        chartData.labels.splice(i, 1);
-                        chartData.datasets[0].data.splice(i, 1);
-                        myChart.update();
-                        break;
-                    }
-                }
+
                 showSuccess(`Категория "${nameInput}" успешно удалена!`);
                 div.remove();
                 const deletedElements = document.getElementsByClassName(nameInput)[0];
                 deletedElements.remove();
-                console.log(deletedElements)
                 expensesScore -= eval(priceInput);
-                setTimeout(() => {renderOperationsData()}, 500);
-  
+                setTimeout(() => {renderOperationsData(), updateFiterElements(), amountBalance();}, 1000);
+                
             })
             div.appendChild(deleteCategory);
             container.appendChild(div);
     });
+
   }

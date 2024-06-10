@@ -2,11 +2,12 @@
 authorized = 0;
 currentUserId = -1;
 currentUserName = '';
-categoriesLimit = 6 ;
+expensesCategoriesLimit = 8;
+incomeCategoriesLimit = 4;
 expensesScore = 0;
 incomeScore = 0;
 currentElementClassName = '';
-isDarkTheme = 0;
+isDarkTheme = false;
 lock = 0;
 deletedElement = 0;
 changedElement = 0;
@@ -14,11 +15,13 @@ operationIsClosed = 1;
 currentPrice = 0;
 isExpensesWindow = true;
 sumAmountScore = 0;
+defaultExpensesCategories = ['Еда','Транспорт','Услуги','Дом','Инвестиции','Здоровье'];
+defaultIncomeCategories = ['Работа','Хобби'];
+currentPreviewSlide = 1;
 
 
 // Данные для круговой диаграммы (начальные данные)
 const chartData = {
-  labels: [],
   datasets: [{
     data: [],
     backgroundColor: [
@@ -27,6 +30,8 @@ const chartData = {
       'rgba(255, 206, 86)',
       'rgba(75, 192, 192)',
       'rgba(153, 102, 255)',
+      'rgba(215, 245, 66)',
+      'rgba(66, 245, 239)',
     ],
     borderWidth: 1,
     borderWidth: 0,
@@ -118,10 +123,10 @@ function renderOperationsData(){
 
         const operationType = document.createElement('p');
         operationType.classList.add('operationType');
-        if (data[i].categoryType === 'addendum' && data[i].price < 0) {
+        if (data[i].categoryType === 'addendum' && data[i].price === -1) {
         operationType.textContent = 'Новый расход: ';
         }
-        else if (data[i].categoryType === 'addendum' && data[i].price > 0) {
+        else if (data[i].categoryType === 'addendum' && data[i].price === 1) {
           operationType.textContent = 'Новый доход: ';
           }
         else if (data[i].categoryType === 'income') {
@@ -221,11 +226,10 @@ function renderOperationsData(){
                     "operationsUserId": data[i].operationsUserId
                   }),
                 })
-                alert("asd")
                 showSuccess(`Операция ${data[i].categoryName} изменена`);
                 backDialogWindow.remove();
                 dialogWindow.remove();
-                setTimeout(() => {renderOperationsData()}, 500);
+                setTimeout(() => {renderOperationsData()}, 1000);
   
               }else {
                 showWarning('Заполните поле "Новый счёт"');
@@ -250,7 +254,7 @@ function renderOperationsData(){
                   })
   
               showSuccess(`Операция ${data[i].categoryName} удалена`);
-              setTimeout(() => {renderOperationsData()}, 500);
+              setTimeout(() => {renderOperationsData()}, 1000);
               backDialogWindow.remove();
               dialogWindow.remove();
             })
@@ -315,7 +319,7 @@ function renderOperationsData(){
                   })
   
               showSuccess(`Категория ${data[i].categoryName} удалена`);
-              setTimeout(() => {renderOperationsData()}, 500);
+              setTimeout(() => {renderOperationsData()}, 1000);
               backDialogWindow.remove();
               dialogWindow.remove();
             })
@@ -459,6 +463,9 @@ function openAccount(){
     exitButton.classList.add('exitButton');
     exitButton.textContent = 'Выйти';
     exitButton.addEventListener('click', () => {
+    renderAmount('expenses');
+    const sumAmountTitle = document.getElementsByClassName('sumAmountTitle')[0];
+    sumAmountTitle.innerHTML = '';
 
     const operationsItemList = document.getElementsByClassName('operationsItemList')[0];
     operationsItemList.innerHTML = '';
@@ -489,7 +496,6 @@ function openAccount(){
     myChart.data.labels = incomeItems.map(item => item.name);
     myChart.update();
      expensesScore = 0;
-     sumAmount.textContent = expensesScore;
      authorized = 0;
      currentUserId = -1;
      currentUserName = '';
@@ -520,6 +526,101 @@ function openAccount(){
 function RenderData(){
 
   document.addEventListener('DOMContentLoaded', () => { 
+    if (getCookie('currentUser') === undefined) {
+      const counter = document.createElement('p');
+      counter.classList.add('counter');
+      counter.innerHTML =  `${currentPreviewSlide}/7`;
+
+
+      const bg = document.createElement('div');
+      bg.classList.add('preloaderBg');
+      document.body.appendChild(bg);
+      const userImgs = document.getElementsByClassName('userImg')[0];
+      userImgs.addEventListener('click', logWindow);
+
+      const next = document.createElement('img');
+      next.classList.add('next');
+      next.src = '/imgs/openOperationsButtonLightTheme.png';
+      next.style.rotate = '90deg';
+
+      next.addEventListener('click', () => { // кнопка вперед
+        if (currentPreviewSlide < 7) { 
+          currentPreviewSlide++;
+          counter.innerHTML =  `${currentPreviewSlide}/7`;
+          phrase.classList.toggle(`phrase${currentPreviewSlide}`);
+          phrase.classList.replace(`phrase${currentPreviewSlide - 1}`, `phrase${currentPreviewSlide}`);
+          coinEmoji.classList.replace(`coinEmoji${currentPreviewSlide - 1}`, `coinEmoji${currentPreviewSlide}`);
+
+          if (currentPreviewSlide === 2 || currentPreviewSlide === 3 || currentPreviewSlide === 4 || currentPreviewSlide === 5 || currentPreviewSlide === 6) {
+            bg.style.backdropFilter = 'blur(0px)';
+            bg.style.backgroundColor = 'rgba(0, 0, 0, 0.0)';
+            counter.style.color = 'black';
+          }
+          else {
+            bg.style.backdropFilter = 'blur(5px)';
+            bg.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+            counter.style.color = 'white';
+          }
+        }
+        else {
+          bg.remove();
+        }
+      });
+
+      const back = document.createElement('img');
+      back.classList.add('back');
+      back.src = '/imgs/openOperationsButtonLightTheme.png';
+      back.style.rotate = '-90deg';
+      currentPreviewSlide = 1;
+
+      const coinEmoji = document.createElement('img');
+      coinEmoji.src = 'coinEmojies/heheEmoji.png';
+      coinEmoji.classList.add('coinEmoji');
+      coinEmoji.classList.add('coinEmoji1');
+
+      const phrase = document.createElement('p');
+      phrase.classList.add('phrases');
+      phrase.classList.add('phrase1');
+
+      bg.appendChild(phrase);
+      bg.appendChild(coinEmoji);
+
+      back.addEventListener('click', () => { // кнопка назад
+        // bg.remove();
+        if (currentPreviewSlide > 1) {
+          currentPreviewSlide--;      
+          counter.innerHTML =  `${currentPreviewSlide}/7`;  
+          phrase.classList.replace(`phrase${currentPreviewSlide + 1}`, `phrase${currentPreviewSlide}`);
+          coinEmoji.classList.replace(`coinEmoji${currentPreviewSlide + 1}`, `coinEmoji${currentPreviewSlide}`);
+        }
+
+        if (currentPreviewSlide === 2 || currentPreviewSlide === 3 || currentPreviewSlide === 4 || currentPreviewSlide === 5 || currentPreviewSlide === 6) {
+          bg.style.backdropFilter = 'blur(0px)';
+          bg.style.backgroundColor = 'rgba(0, 0, 0, 0.0)';
+          counter.style.color = 'black';
+        }
+        else {
+          bg.style.backdropFilter = 'blur(5px)';
+          bg.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+          counter.style.color = 'white';
+        }
+      });
+      document.body.appendChild(bg);
+      bg.appendChild(next);
+      bg.appendChild(back);
+      bg.appendChild(counter);
+
+
+      const closeX = document.createElement('p');
+      closeX.classList.add('skip');
+      closeX.textContent = 'Пропустить';
+      closeX.addEventListener('click', () => {
+        bg.remove();
+      });
+      document.body.appendChild(bg);
+      bg.appendChild(closeX);
+      
+    }
     renderOperationsData ();
     fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/users')
       .then(response => response.json())
@@ -542,15 +643,8 @@ function RenderData(){
               incomeItems.push({ name: data.name, price: data.price, category: 'income' });
               addData(data.name, data.price);
             }
-
-            const sumAmountTitle = document.getElementsByClassName('sumAmountTitle')[0];
+      });
     });
-
-
-    });
-      // Получение контейнера элементов
-     
-
   });
 
 }
@@ -601,12 +695,56 @@ function updateDataFromAPI() {
     
 }
 
+function updateFiterElements() {
+  const categoryFilter = document.getElementById('categoryFilter');
+  categoryFilter.innerHTML = '';
+  categoryFilter.innerHTML = '<option disabled selected value="defaultOption">Сортировать по категории</option>';
+  fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/categories')
+    .then(response => response.json())
+    .then(data => {
+      data.forEach(data => {
+        if (data.userId === currentUserId) {
+          const optionElement = document.createElement('option');
+          optionElement.value = data.name;
+          optionElement.text = data.name;
+          categoryFilter.appendChild(optionElement);
+
+        }
+      });
+    });
+}
+function amountBalance() {
+  const sumAmountTitle = document.getElementsByClassName('sumAmountTitle')[0];
+
+  let balance = 0;
+  expensesItems.forEach(item => {
+    balance -= eval(item.price);
+  })
+  incomeItems.forEach(item => {
+    balance += eval(item.price);
+  })
+
+  sumAmountTitle.textContent = `Ваш баланс: ${balance} ₽`;
+  if (balance < 0) {
+    sumAmountTitle.classList.remove('operationPricePositive');
+    sumAmountTitle.classList.add('operationPriceNegative');
+  } else if (balance > 0) {
+    sumAmountTitle.classList.remove('operationPriceNegative');
+    sumAmountTitle.classList.add('operationPricePositive');
+  }
+  else {
+    sumAmountTitle.classList.remove('operationPriceNegative');
+    sumAmountTitle.classList.remove('operationPricePositive');
+  }
+}
+
 function swipCategories() {
+  const sumAmount = document.getElementById('sumAmount');
   const headerTitle = document.getElementsByClassName('headerTitle')[0];
   let categoriesContainer = document.getElementById('categoriesContainer');
   categoriesContainer.innerHTML = '';
   if(isExpensesWindow){
-
+    renderAmount('income');
     headerTitle.textContent = "Доходы";
     chartData.labels = incomeItems.map(item => item.name);
     chartData.datasets[0].data = incomeItems.map(item => eval(item.price));
@@ -621,6 +759,7 @@ function swipCategories() {
       });
     });
   } else {
+    renderAmount('expenses');
     headerTitle.textContent = "Расходы";
     chartData.labels = expensesItems.map(item => item.name);
     chartData.datasets[0].data = expensesItems.map(item => eval(item.price));
@@ -640,13 +779,13 @@ function swipCategories() {
 }
 
 function logWindow() { // авторизация
-  if (authorized == 0) {
+
     const backLogRegWindow = document.createElement('div');
     backLogRegWindow.classList.add('backLogRegWindow');
   
     const logRegWindow = document.createElement('div');
     logRegWindow.classList.add('logRegWindow');
-  
+
     const close = document.createElement('img');
     close.classList.add('close');
     close.src = 'imgs/close.png';
@@ -676,21 +815,10 @@ function logWindow() { // авторизация
       }
       else {
         //тело изменений
-        const userImg = document.getElementsByClassName('userImg')[0];
-        const userName = document.createElement('button');
-        userName.classList.add('userName');
-        userName.textContent = 'Личный кабинет';
-        userName.addEventListener('click', openAccount) 
-        userImg.parentNode.replaceChild(userName, userImg);
 
-        const header = document.getElementsByClassName('header')[0];
-        header.style.flexDirection = "row-reverse";
-        header.appendChild(userName);
-        lock = 0;
-        document.cookie = `currentUser=${login.value}`;
-        expensesItems = [];
-        const container = document.getElementById('categoriesContainer');
-        container.innerHTML = '';
+        renderAmount('expenses');
+
+
         fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/users')
         .then(response => response.json())
         .then(data => {
@@ -698,7 +826,24 @@ function logWindow() { // авторизация
             if (data[i].login === login.value || data[i].phone === login.value && data[i].password === password.value) {
               lock = 1;
               authorized = 1;
+
+              const userImg = document.getElementsByClassName('userImg')[0];
+              const userName = document.createElement('button');
+              userName.classList.add('userName');
+              userName.textContent = 'Личный кабинет';
+              userName.addEventListener('click', openAccount) 
+              userImg.parentNode.replaceChild(userName, userImg);
+      
+              const header = document.getElementsByClassName('header')[0];
+              header.style.flexDirection = "row-reverse";
+              header.appendChild(userName);
+              document.cookie = `currentUser=${login.value}`;
+              expensesItems = [];
+              const container = document.getElementById('categoriesContainer');
+              container.innerHTML = '';
+
               showSuccess(`С возвращением, ${data[i].login}!`);
+              
               document.cookie = `currentUserId=${data[i].id}`;
               currentUserId = data[i].id;
               currentUserName = data[i].login;
@@ -708,7 +853,6 @@ function logWindow() { // авторизация
                 .then(response => response.json())
                 .then(data => {
                   for (let i = 0; i < data.length; i++) {
-                    if (isExpensesWindow){}
                     if (data[i].userId === currentUserId && data[i].categoryType === 'income') {
                       incomeItems.push({ name: data[i].name, price: data[i].price, categoryType: 'income' });
                       incomeScore += eval(data[i].price);
@@ -717,9 +861,8 @@ function logWindow() { // авторизация
                       chartData.labels = incomeItems.map(item => item.name);
                       chartData.datasets[0].data = incomeItems.map(item => eval(item.price));
                       myChart.update();
-                      sumAmountScore += eval(data[i].price);
-
-                }
+                      // sumAmountScore += eval(data[i].price);
+                    }
                     else if (data[i].userId === currentUserId && data[i].categoryType === 'expenses') {
                       expensesItems.push({ name: data[i].name, price: data[i].price, categoryType: 'expenses' });
                       expensesScore += eval(data[i].price);
@@ -727,31 +870,15 @@ function logWindow() { // авторизация
                       addCategoryElement(data[i].name, data[i].price)
                       chartData.labels = expensesItems.map(item => item.name);
                       chartData.datasets[0].data = expensesItems.map(item => eval(item.price));
-                      sumAmountScore -= eval(data[i].price);
-
+                      // sumAmountScore -= eval(data[i].price);
                     }
-                    const sumAmountTitle = document.getElementsByClassName('sumAmountTitle')[0];
-                    myChart.update();
+                  amountBalance();
+                  myChart.update();
               }
               });
-                
-              
-              // fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories')
-              // .then(response => response.json())
-              // .then(data => {
-              //   for (let i = 0; i < data.length; i++) {
-              //     if (data[i].userId === currentUserId && data[i].categoryType === 'expenses') {
-              //       expensesItems.push({ name: data[i].name, price: data[i].price, categoryType: 'expenses' });
-              //       expensesScore += eval(data[i].price);
-              //       addData(data[i].name, data[i].price);
-              //       addCategoryElement(data[i].name, data[i].price)
-              //       sumAmount.textContent = `Итого: ${expensesScore}` + ' ₽';
-              // }}});
-              
-              // break;
             }
           }
-          setTimeout(() => {renderOperationsData()}, 500);
+          setTimeout(() => {renderOperationsData(), updateFiterElements()}, 1000);
           if (lock === 0) {
             showWarning('Неверный логин или пароль');
           }
@@ -776,14 +903,13 @@ function logWindow() { // авторизация
     logRegWindow.appendChild(close);
     logRegWindow.appendChild(confirmButton);
     logRegWindow.appendChild(alreadyReg);
-  }
- else {
-    
-  openAccount();
- }
 }
 
 function regWindow() { // регистрация
+
+  lock1 = 1;
+  lock2 = 1;
+  lock3 = 1;
 
   const backLogRegWindow = document.createElement('div');
   backLogRegWindow.classList.add('backLogRegWindow');
@@ -806,30 +932,71 @@ function regWindow() { // регистрация
     const login = document.createElement('input');
     login.type = 'text';
     login.placeholder = 'Логин';
+    login.addEventListener('input', () => {
+      if (login.value.length < 4) {
+       lock1 = 1
+      }
+      else {
+        lock1 = 0
+      }
+
+      if (lock1 + lock2 + lock3 == 0) {
+        confirmButton.disabled = false;
+      }
+      else {
+        confirmButton.disabled = true;
+      }
+    });
 
     const password = document.createElement('input');
     password.type = 'password';
     password.placeholder = 'Пароль';
+    password.addEventListener('input', () => {
+      if (password.value.length < 4) {
+       lock2 = 1
+      }
+      else {
+        lock2 = 0
+      }
+
+      if (lock1 + lock2 + lock3 == 0) {
+        confirmButton.disabled = false;
+      }
+      else {
+        confirmButton.disabled = true;
+      }
+    });
 
     const phone = document.createElement('input');
     phone.type = 'phone';
     phone.placeholder = 'Номер телефона';
+    phone.classList.add('tel');
+
+    phone.addEventListener('input', () => {
+      inputMaskFunc(this)
+      console.log(phone.value.length)
+      if (phone.value.length < 18) {
+       lock3 = 1
+      }
+      else {
+        lock3 = 0
+      }
+
+      if (lock1 + lock2 + lock3 == 0) {
+        confirmButton.disabled = false;
+      }
+      else {
+        confirmButton.disabled = true;
+      }
+    });
 
     const confirmButton = document.createElement('button');
     confirmButton.classList.add('confirmButton');
     confirmButton.textContent = 'Зарегистрироваться';
+    confirmButton.disabled = true;
     confirmButton.addEventListener('click', () => {
     lock = 0;
-    if (!login.value || !password.value || !phone.value) {
-      showWarning('Заполните все поля')
-    } 
-    else if (login.value.length < 4 || password.value.length < 4) {
-      showWarning('Логин или пароль слишком короткие');
-    }
-    else if (!phone.value.includes('+79') && !phone.value.includes('89')) {
-      showWarning('Некорректный номер телефона');
-    } 
-      else {
+    
       fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/users')
       .then(response => response.json())
       .then(data => {
@@ -844,12 +1011,51 @@ function regWindow() { // регистрация
 
           // подтверждение телефона
 
+          for (let i = 0; i < defaultExpensesCategories.length; i++) {
+          const newCategories = {
+            userId: String(data.length + 1),
+            name: defaultExpensesCategories[i],
+            price: 0,
+            categoryType: 'expenses',
+          }
 
+          fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories', {
+            method: 'POST',
+            headers: {'content-type':'application/json'},
+            body: JSON.stringify(newCategories)
+          }).then(res => {
+            if (res.ok) {
+                return res.json();
+            }
+          })
+        }
+
+        for (let i = 0; i < defaultIncomeCategories.length; i++) {
+          const newCategories = {
+            userId: String(data.length + 1),
+            name: defaultIncomeCategories[i],
+            price: 0,
+            categoryType: 'income',
+          }
+
+          fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/categories', {
+            method: 'POST',
+            headers: {'content-type':'application/json'},
+            body: JSON.stringify(newCategories)
+          }).then(res => {
+            if (res.ok) {
+                return res.json();
+            }
+          })
+        
+        }
           const newTask = {
             login: login.value, 
             password: password.value,
-            phone: phone.value, 
+            phone: phone.value.split(' ').join('').split('(').join('').split(')').join('').split('-').join(''), 
             score: 0,
+            birthDay: '',
+            email: '',
           };
           fetch('https://65d052c7ab7beba3d5e2f6fc.mockapi.io/v1/users', {
             method: 'POST',
@@ -883,7 +1089,7 @@ function regWindow() { // регистрация
           })
         }
       })
-    }
+    
     if (lock === 1) {
       showSuccess('Регистрация прошла успешно');
       logRegWindow.remove();
@@ -932,4 +1138,10 @@ function closeOperationsWindow() {
 
 }
 
-// сделать изменение цены и названия категории
+
+function dateFilter() {
+  const dateSort = document.getElementById('dateFilters');
+
+  const selectedOption = dateSort.value;
+  console.log(selectedOption);
+}

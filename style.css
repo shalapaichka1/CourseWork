@@ -41,6 +41,7 @@
 }
 
 *{
+    user-select: none;
     font-family: "Golos Text" ;
     margin: 0;
     padding: 0;
@@ -50,10 +51,11 @@
 }
 
 body {
+    min-width: 500px;
     display: inline;
     font-family: Arial, sans-serif;
     text-align: center;
-    overflow-y: hidden;
+    overflow: hidden;
   }
 
   #categoriesContainer {
@@ -88,11 +90,11 @@ body {
     justify-content: center;
     display: flex;
     top: 0;
-    background-color: #ffffff, 0.9;
+    background-color:  0.9;
     width: 100%;
     height: 100%;
     position: absolute;
-    z-index: 2;
+    z-index: 2; 
     backdrop-filter: blur(10px);
   }
 
@@ -121,7 +123,7 @@ body {
     flex-direction: column;
   }
 
-  .dialogWindow:hover, .logRegWindow:hover, .operationsItemInfo:hover{
+  .light-theme .operationsItemInfo:hover, .dark-theme .operationsItemInfo:hover, .light-theme .dialogWindow:hover, .dark-theme .dialogWindow:hover, .dark-theme .logRegWindow:hover, .light-theme .dialogWindow:hover, .light-theme .logRegWindow:hover{
     transition: .2s ease-in-out;
     box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(15px);
@@ -146,13 +148,11 @@ body {
   }
 
   .userName {
-
     position: relative;
     margin: 10px;
   }
 
   .closeX{
-    rotate: 180deg;
     position: absolute;
     width: 50px;
     right: 0;
@@ -164,6 +164,7 @@ body {
   .closeX:hover{
     cursor: pointer;
   }
+
   .priceInput ::placeholder{
     text-align: center;
   }
@@ -171,6 +172,7 @@ body {
   h3{
     font-size: 24px;
   }
+
   p{
     font-size: 20px;
   }
@@ -240,7 +242,7 @@ body {
   .exitButton:hover, .deleteOperationButton:hover {
     cursor: pointer;
     background-color: rgb(255, 70, 70);
-    color: #f5f5f5;
+    color: #fff2d7;
   }
   .titleNscore{
     position: relative;
@@ -257,36 +259,45 @@ body {
     border-radius: 5px;
     padding: 5px;
   }
-  .titleNscore:hover{
+  .light-theme .titleNscore:hover{
     scale: 1.05;
     cursor: pointer;
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
   }
+  .dark-theme .titleNscore:hover{
+    scale: 1.05;
+    cursor: pointer;
+    box-shadow: 0px 0px 10px 0px rgba(255, 255, 255, 0.2);
+  }
   .light-theme {
-    background-color: #f5f5f5;
-    color: #202020;
-    border: 1px solid #f5f5f5;
+    background-color: #fff2d7;
+    color: #201c25;
+    border: 1px solid #9e9496;
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
   }
 
-  .light-theme input, .light-theme button, .light-theme select{
-    background: #f5f5f5;
-    border: 1px solid #000000;
-    color: #202020;
-  }
-  
-  .dark-theme, .dark-theme .dialogWindow, .dark-theme .logRegWindow, .dark-theme .operationsItemInfo {
-    background: #202020;
-    color: #f5f5f5;
-    border: 1px solid #202020;
+  .dark-theme {
+    background: #201c25;
+    color: #fff2d7;
+    border: 1px solid #514663;
     box-shadow: 0px 0px 10px 0px rgba(255, 255, 255, 0.2);
   }
+   .light-theme .success, .light-theme input, .light-theme button, .light-theme select, .light-theme .categories, .light-theme .headerTitle{
+    background: #fbf7f5;
+    color: #201c25;
+  }
+  
+  .dark-theme .dialogWindow, .dark-theme .logRegWindow, .dark-theme .operationsItemInfo, .dark-theme .headerTitle, .dark-theme .categories {
+    background: #3d35484f;
+    color: #fbf7f5;
+    backdrop-filter: blur(5px);
+    box-shadow: 0px 0px 10px 0px rgba(255, 255, 255, 0);
+  }
 
-  .dark-theme input, .dark-theme button, .dark-theme select {
-    background: #202020;
-    border: 1px solid #ccc;
-    color: #f5f5f5;
-    border: 1px solid #aaaaaa;
+  .dark-theme .success, .dark-theme input, .dark-theme button, .dark-theme select {
+    background: #3d3548;
+    color: #fff2d7;
+    border: 1px solid #514663;
   }
 
   .success {
@@ -298,8 +309,6 @@ body {
     top: -10%;
     left: 10px;
     transform: translate(-50%, -50%);
-    background: #f5f5f5;
-    color: #202020;
     padding: 20px;
     border-radius: 5px;
   }
@@ -474,7 +483,7 @@ body {
     width: 100px;
     height: 100%;
     overflow: auto;
-    background-color: #f5f5f5;
+    background-color: #fff2d7;
     margin: 5px;
   }
 
@@ -500,11 +509,11 @@ body {
   }
 
   .light-theme .operationElement:hover {
-    background-color: #e6e6e6;
+    background-color: #fbf7f5;
   }
 
   .dark-theme .operationElement:hover {
-    background-color: #474747;
+    background-color: #3d3548;
   }
   .operationCategoryTitles {
     position: relative;
@@ -544,12 +553,14 @@ body {
   }
   .operationDate {
     position: absolute;
-    bottom: 60px;
+    bottom: 30px;
+    left: 10px;
     font-size: 16px;
   }
   .operationTime {
     position: absolute;
-    bottom: 40px;
+    bottom: 10px;
+    left: 10px;
     font-size: 14px;
   }
 
@@ -567,10 +578,22 @@ body {
   }
 
   .sumAmountTitle {
-    margin: 0 auto;
+    position: absolute;
+    top: 120px;
+    left: 0;
+    width: 100%;
     font-size: 28px;
   }
 
+  .dark-theme .sumAmountTitle {
+    border-bottom: 1px solid #514663;
+    background-color: #18151b;
+  }
+
+  .light-theme .sumAmountTitle {
+    border-bottom: 1px solid #9e9496;
+    background-color: #fff9ea;
+  }
   .operationType {
     position: absolute;
     top: 5px;
@@ -698,3 +721,325 @@ body {
     left: 165px;
     width: 40px;
   }
+ 
+  .preloaderBg {
+    z-index: 5;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+  }
+
+  .skip {
+    margin: 15px;
+    background-color: #ffffff;
+    position: absolute;
+    right: 0;
+    bottom: 0%;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .skip:hover, .next:hover, .back:hover{
+    scale: 1.1;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+  }
+
+  .next, .back{
+    margin: 35px;
+    background-color: #ffffff;
+    position: absolute;
+    bottom: 50%;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .next:hover, .back:hover, .skip:hover{
+    background-color: #e4e4e4;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+  }
+  .back {
+    left: 0;
+  }
+
+  .next {
+    right: 0;
+  }
+
+  .counter {
+    z-index: 6;
+    position: absolute;
+    bottom: 0;
+    right: 50%;
+    margin: 15px;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    color: white;
+    font-size: 30px;
+  }
+  
+  .coinEmoji{
+    width: 400px;
+    position: absolute;
+    top: 40%;
+    left: 20%;
+    transform: translate(-50%, -50%);
+  }
+  
+  @keyframes coinAnim {
+    0% { transform: rotate(-10deg); scale: 1; }
+    50% { transform: rotate(10deg); scale: 1.05; }
+    100% { transform: rotate(-10deg); scale: 1; }
+  }
+
+  @keyframes startAnimCoin {
+    0% { opacity: 0; left: 00%; top: 40%;}
+    100% { opacity: 1; left: 20%; top: 40%;}
+  }
+
+  @keyframes startAnimCoin2 {
+    0% { opacity: 1; left: 20%; top: 40%}
+    100% { opacity: 1; left: 70%; top: 50%}
+  }
+
+  @keyframes startAnimCoin3 {
+    0% { opacity: 1; left: 70%; top: 50%}
+    100% { opacity: 1; left: 70%; top: 25%}
+  }
+
+  @keyframes startAnimCoin4 {
+    0% { opacity: 1; left: 70%; top: 25%}
+    100% { opacity: 1; left: 10%; top: 35%}
+  }
+
+  @keyframes startAnimCoin5 {
+    0% { opacity: 1; left: 10%; top: 35%}
+    100% { opacity: 1; left: 65%; top: 55%}
+  }
+
+  @keyframes startAnimCoin6 {
+    0% { opacity: 1; left: 65%; top: 55%}
+    100% { opacity: 1; left: 15%; top: 35%}
+  }
+
+  @keyframes startAnimCoin7 {
+    0% { opacity: 1; left: 15%; top: 35%}
+    100% { opacity: 1; left: 20%; top: 25%}
+  }
+
+  @keyframes startAnimPhrase {
+    0% { opacity: 0; left: 130%; }
+    100% { opacity: 1; left: 55%;}
+  }
+
+  @keyframes startAnimPhrase2 {
+    0% { opacity: 0; left: 80%; top: -40%; }
+    100% { opacity: 1; left: 80%; top: 35%; }
+  }
+
+  @keyframes startAnimPhrase3 {
+    0% { opacity: 0; left: 80%; top: -40%; }
+    100% { opacity: 1; left: 80%; top: 15%; }
+  }
+
+  @keyframes startAnimPhrase4 {
+    0% { opacity: 1; left: -30%; top: 25%; }
+    100% { opacity: 1; left: 30%; top: 25%; }
+  }
+
+  @keyframes startAnimPhrase5 {
+    0% { opacity: 1; left: 50%; top: 150%; }
+    100% { opacity: 1; left: 50%; top: 70%; }
+  }
+
+  @keyframes startAnimPhrase6 {
+    0% { opacity: 1; left: 35%; top: 125%; }
+    100% { opacity: 1; left: 35%; top: 90%; }
+  }
+
+  @keyframes startAnimPhrase7 {
+    0% { opacity: 1; left: 35%; top: 90%; }
+    100% { opacity: 1; left: 55%; top: 40%; }
+  }
+  .phrases {
+    width: 800px;
+    background-color: white;
+    position: absolute;
+    top: 30%;
+    left: 65%;
+    font-size: 40px;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    padding: 30px;
+    border-radius: 25px;
+  }
+
+  .phrases:hover {
+    transition: .2s ;
+    scale: 1.05;
+    box-shadow: 0px 0px 10px 0px rgba(255, 255, 255, 0.9);
+  }
+  .phrase1::before {
+    content: 'Добро пожаловать в Dinero, тут вы сможете анализировать свои расходы и доходы, и научитесь контролировать свой бюджет. А я помогу вам с этим !';
+  }
+  .phrase1{
+    font-size: 20px;
+    width: 400px;
+    animation: startAnimPhrase .9s forwards ease-out;
+  }
+
+  .phrase2::before {
+    content: 'Это главное окно, где вы видите свои раходы и доходы в виде диаграммы. Пока что диаграммы нет, потому что еще нет введённых данных, давайте исправим это!';
+  }
+  .phrase2{
+    animation: startAnimPhrase2 .9s forwards ease-out;
+    font-size: 20px;
+    width: 350px;
+  }
+
+  .phrase3::before {
+    content: 'Первым делом вам нужно создать аккаунт или войти в уже существующий. Вы можете сделать это, нажав на иконку человечка в верхней правой части экрана.';
+
+  }
+
+  .phrase3 {
+    animation: startAnimPhrase3 .9s forwards ease-out;
+    font-size: 20px;
+    width: 400px;
+  }
+
+  .phrase4::before {
+    content: 'После этого вы увидите свои категории и сможете добавлять данные в диаграмму. Чтобы переключаться между доходами и расходами, выберите "Доходы" или "Расходы".';
+  }
+
+  .phrase4 {
+    font-size: 20px;
+    width: 400px;
+    animation: startAnimPhrase4 .9s forwards ease-out;
+  }
+
+  .phrase5::before {
+    content: 'Для добавления новых категорий введите название категории и нажмите "Добавить категорию".';
+  }
+
+  .phrase5 {
+    font-size: 20px;
+    width: 400px;
+    animation: startAnimPhrase5 .9s forwards ease-out;
+  }
+
+  .phrase6::before {
+    content: 'Все совершенные операции вы можете увидеть в разделе "Операции" в нижней левой части экрана.';
+  }
+
+  .phrase6 {
+    font-size: 20px;
+    width: 400px;
+    animation: startAnimPhrase6 .9s forwards ease-out;
+  }
+
+  .phrase7::before {
+    content: 'Видите? Ничего сложного. Удачи вам и будьте внимательны с деньгами!';
+  }
+
+  .phrase7 {
+    font-size: 20px;
+    width: 400px;
+    animation: startAnimPhrase7 .9s forwards ease-out;
+  }
+
+  .coinEmoji1 {
+    animation: coinAnim 5s infinite, startAnimCoin .5s forwards ease-out;
+  }
+
+  .coinEmoji2{
+    animation: coinAnim 5s infinite, startAnimCoin2 .5s forwards ease-out;
+  }
+
+  .coinEmoji3 {
+    animation: coinAnim 5s infinite, startAnimCoin3 1s forwards ease-out;
+  }
+
+  .coinEmoji4 {
+    animation: coinAnim 5s infinite, startAnimCoin4 .5s forwards ease-out;
+  }
+
+  .coinEmoji5 {
+    animation: coinAnim 5s infinite, startAnimCoin5 1s forwards ease-out;
+  }
+
+  .coinEmoji6 {
+    animation: coinAnim 5s infinite, startAnimCoin6 .5s forwards ease-out;
+  }
+
+  .coinEmoji7 {
+    animation: coinAnim 5s infinite, startAnimCoin7 1s forwards ease-out;
+  }
+
+  button:disabled {
+    opacity: 0.5;
+  }
+
+ .refresh {
+  position: absolute;
+  cursor: pointer;
+  z-index: 1;
+ }
+
+ .refresh:hover {
+  animation: spin 1s linear infinite;
+ }
+
+ .monthBlock {
+  position: absolute;
+  z-index: 1;
+  top: 80px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+ }
+ 
+ .monthBlock > p {
+  padding: 5px;
+  margin: 5px;
+  cursor: pointer;
+  user-select: none;
+ }
+
+ .currentMonth {
+  width: 120px;
+ }
+
+ .nextMonth, .prewMonth {
+  width: 34px;
+  border-radius: 5px;
+ }
+ .dark-theme .nextMonth:hover, .dark-theme .prewMonth:hover {
+
+  background: #fff2d7;
+  color: #201c25;
+ }
+ 
+ .light-theme .nextMonth:hover, .light-theme .prewMonth:hover {
+  background: #201c25;
+  color: #fff2d7;
+  text-align: center;
+  justify-content: center;
+  display: flex;
+ }
+
+ .nextMonth:active, .prewMonth:active {
+  scale: 0.95;
+ }
+
+@media screen and (max-width: 480px) {
+  
+}
